@@ -1,0 +1,18 @@
+/* InstrumentStrip Styles (§2.4) */
+
+.instrument-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  width: 100%;
+  padding-top: var(--space-4);
+}
+
+@media (max-width: 639px) {
+  .instrument-strip {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
