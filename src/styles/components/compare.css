@@ -1,0 +1,106 @@
+/* Compare Page Component Styles (§4.3) */
+
+.compare-search {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+}
+
+.compare-search__input {
+  width: 100%;
+  background: var(--panel-raised);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-panel);
+  padding: var(--space-3) var(--space-4);
+  color: var(--parchment);
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  transition: all 150ms ease;
+}
+
+.compare-search__input:focus {
+  border-color: var(--brass);
+  box-shadow: 0 0 12px var(--brass-glow);
+}
+
+.compare-search__dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-panel);
+  z-index: 50;
+  list-style: none;
+  overflow: hidden;
+}
+
+.compare-search__option {
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  border-bottom: 1px solid var(--hairline);
+  transition: background 150ms ease;
+}
+
+.compare-search__option:hover {
+  background: var(--panel-raised);
+  color: var(--brass);
+}
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-6);
+  width: 100%;
+}
+
+.compare-card {
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-panel);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  position: relative;
+  box-shadow: var(--shadow-panel);
+}
+
+.compare-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: var(--space-3);
+}
+
+.compare-card__name {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--brass);
+}
+
+.compare-card__country {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--parchment-dim);
+}
+
+.compare-card__remove {
+  background: none;
+  border: none;
+  color: var(--parchment-dim);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.compare-card__remove:hover {
+  color: var(--signal);
+}
