@@ -1,0 +1,76 @@
+/* Orbit Ring System CSS (§2.5) */
+
+.orbit-system-container {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orbit-ring-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.orbit-ring-track {
+  fill: none;
+  stroke: var(--hairline);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 6;
+}
+
+.orbit-ring-track--active {
+  stroke: var(--brass);
+  stroke-dasharray: none;
+  filter: drop-shadow(0 0 8px var(--brass-glow));
+}
+
+/* Continuous Rotation Keyframes (§2.5) */
+.orbit-ring-group {
+  transform-origin: center;
+  transition: transform 0.5s ease-out;
+}
+
+.orbit-ring-group--outer {
+  animation: spinOuter 120s linear infinite;
+}
+
+.orbit-ring-group--mid {
+  animation: spinMid 80s linear infinite;
+}
+
+.orbit-ring-group--inner {
+  animation: spinInner 45s linear infinite;
+}
+
+.orbit-ring-group--paused {
+  animation-play-state: paused !important;
+}
+
+@keyframes spinOuter {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spinMid {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes spinInner {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 639px) {
+  .orbit-system-container {
+    max-width: 360px;
+  }
+}
