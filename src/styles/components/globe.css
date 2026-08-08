@@ -1,0 +1,49 @@
+/* WebGL Globe Container Styles */
+
+.globe-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.globe-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  position: relative;
+  cursor: grab;
+}
+
+.globe-container:active {
+  cursor: grabbing;
+}
+
+.globe-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50%;
+  display: block;
+}
+
+/* Brass Ring Bezel framing the globe */
+.globe-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  border: 1px solid var(--hairline);
+  box-shadow: 0 0 30px var(--brass-glow), inset 0 0 30px rgba(11, 14, 26, 0.8);
+  pointer-events: none;
+}
+
+@media (max-width: 639px) {
+  .globe-wrapper {
+    max-width: 340px;
+  }
+}

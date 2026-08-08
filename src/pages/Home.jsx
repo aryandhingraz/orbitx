@@ -1,3 +1,5 @@
+import { Globe } from '../globe/Globe.jsx';
+
 export function Home() {
   return (
     <div className="page-container">
@@ -8,8 +10,8 @@ export function Home() {
         </h1>
         <p className="page-subtitle">Real-time planetary telemetry & orbital positioning</p>
       </header>
-      <div className="page-content">
-        {/* Globe & Orbit Ring System mounts here */}
+      <div className="page-content" style={{ display: 'flex', justifyContent: 'center', padding: '2rem 0' }}>
+        <Globe />
       </div>
     </div>
   );
