@@ -29,9 +29,9 @@ export function CompareCityCard({ city, onRemove }) {
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
         {weather.isLoading ? (
-          <SkeletonPulse width="100%" height="54px" />
+          <SkeletonPulse width="100%" height="68px" />
         ) : (
           <InstrumentGauge
             label="Temperature"
@@ -42,7 +42,7 @@ export function CompareCityCard({ city, onRemove }) {
         )}
 
         {airQuality.isLoading ? (
-          <SkeletonPulse width="100%" height="54px" />
+          <SkeletonPulse width="100%" height="68px" />
         ) : (
           <InstrumentGauge
             label="Air Quality"
@@ -53,28 +53,29 @@ export function CompareCityCard({ city, onRemove }) {
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-        <div className="instrument-gauge">
-          <span className="instrument-gauge__label">Wind Speed</span>
-          <span className="instrument-gauge__value" style={{ fontSize: '15px' }}>
-            {formatWindSpeed(weather.data?.windSpeed, units)}
-          </span>
-        </div>
-        <div className="instrument-gauge">
-          <span className="instrument-gauge__label">Humidity & Pressure</span>
-          <span className="instrument-gauge__value" style={{ fontSize: '13px' }}>
-            💧 {weather.data?.humidity ?? 55}% • {weather.data?.pressure ? Math.round(weather.data.pressure) : 1013} hPa
-          </span>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+        <InstrumentGauge
+          label="Wind Speed"
+          value={formatWindSpeed(weather.data?.windSpeed, units)}
+          unit=""
+          status="nominal"
+        />
+
+        <InstrumentGauge
+          label="Humidity & Pressure"
+          value={`${weather.data?.humidity ?? 55}%`}
+          unit={`${weather.data?.pressure ? Math.round(weather.data.pressure) : 1013} hPa`}
+          status="nominal"
+        />
       </div>
 
-      <div className="instrument-gauge">
+      <div className="instrument-gauge" style={{ minHeight: '76px' }}>
         <span className="instrument-gauge__label">Solar Schedule</span>
-        <span className="instrument-gauge__value" style={{ fontSize: '12px' }}>
-          🌅 {sunMoon.data?.sunrise ? new Date(sunMoon.data.sunrise).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '06:12 AM'}
-          {'  •  '}
-          🌇 {sunMoon.data?.sunset ? new Date(sunMoon.data.sunset).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '06:45 PM'}
-        </span>
+        <div style={{ display: 'flex', gap: '16px', fontSize: '13px', fontFamily: 'var(--font-mono)', paddingTop: '4px' }}>
+          <span>🌅 {sunMoon.data?.sunrise ? new Date(sunMoon.data.sunrise).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '06:12 AM'}</span>
+          <span style={{ color: 'var(--parchment-dim)' }}>|</span>
+          <span>🌇 {sunMoon.data?.sunset ? new Date(sunMoon.data.sunset).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '06:45 PM'}</span>
+        </div>
       </div>
     </div>
   );
