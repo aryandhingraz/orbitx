@@ -2,12 +2,13 @@
 
 .instrument-strip {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   gap: var(--space-4);
   flex-wrap: wrap;
   width: 100%;
   padding-top: var(--space-4);
+  margin-top: var(--space-2);
 }
 
 @media (max-width: 639px) {
