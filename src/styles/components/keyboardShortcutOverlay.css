@@ -1,25 +1,25 @@
 /* Keyboard Shortcut Overlay Styles (§14) */
 
-.shortcut-badge-trigger {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
+.shortcut-inline-btn {
   background: var(--panel-raised);
   border: 1px solid var(--hairline);
   color: var(--brass);
-  padding: 6px 12px;
+  padding: 4px 10px;
   border-radius: var(--radius-pill);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 11px;
   cursor: pointer;
-  z-index: 90;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   transition: all 150ms ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.shortcut-badge-trigger:hover {
+.shortcut-inline-btn:hover {
   border-color: var(--brass);
-  box-shadow: 0 0 16px var(--brass-glow);
+  background: var(--panel);
+  box-shadow: 0 0 10px var(--brass-glow);
 }
 
 .shortcut-grid {
@@ -41,10 +41,4 @@
   font-weight: 600;
   text-align: center;
   min-width: 32px;
-}
-
-@media (max-width: 639px) {
-  .shortcut-badge-trigger {
-    bottom: 74px; /* clearance above mobile bottom nav */
-  }
 }

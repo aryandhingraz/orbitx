@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { HashRouter } from 'react-router-dom';
 import { SettingsProvider } from './context/SettingsContext.jsx';
 import { AppRouter } from './router.jsx';
@@ -15,6 +16,8 @@ import { useQuakes } from './hooks/useQuakes.js';
 import { formatTemperature } from './utils/formatters.js';
 
 function ShellContent() {
+  const [showShortcuts, setShowShortcuts] = useState(false);
+
   const geo = useGeolocation();
   const lat = geo.data?.latitude;
   const lon = geo.data?.longitude;
@@ -26,7 +29,7 @@ function ShellContent() {
 
   return (
     <div className="app-shell">
-      <NavRail />
+      <NavRail onOpenShortcuts={() => setShowShortcuts(true)} />
       <main className="main-viewport">
         <LiveTicker
           issSpeed={iss.data?.velocity ? Math.round(iss.data.velocity).toLocaleString() : '27,580'}
@@ -38,6 +41,7 @@ function ShellContent() {
         />
         <AppRouter />
       </main>
+      <KeyboardShortcutOverlay isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
     </div>
   );
 }
@@ -49,7 +53,6 @@ export default function App() {
         <Starfield />
         <OfflineBanner />
         <ShellContent />
-        <KeyboardShortcutOverlay />
       </HashRouter>
     </SettingsProvider>
   );

@@ -1,11 +1,9 @@
 /* InstrumentStrip Styles (§2.4) */
 
 .instrument-strip {
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
   gap: var(--space-4);
-  flex-wrap: wrap;
   width: 100%;
   padding-top: var(--space-4);
   margin-top: var(--space-2);
@@ -13,7 +11,7 @@
 
 @media (max-width: 639px) {
   .instrument-strip {
-    flex-direction: column;
-    align-items: stretch;
+    grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+    gap: var(--space-3);
   }
 }

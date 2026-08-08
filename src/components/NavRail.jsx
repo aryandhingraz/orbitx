@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import '../styles/components/navRail.css';
+import '../styles/components/keyboardShortcutOverlay.css';
 
 const navItems = [
   {
@@ -77,7 +78,7 @@ const navItems = [
   },
 ];
 
-export function NavRail() {
+export function NavRail({ onOpenShortcuts }) {
   return (
     <nav className="nav-rail" aria-label="Main Navigation">
       <div className="nav-rail__header">
@@ -107,8 +108,20 @@ export function NavRail() {
       </ul>
 
       <div className="nav-rail__footer">
-        <span className="nav-rail__pulse-dot" title="Telemetry Feed Live"></span>
-        <span>SYS.ONLINE</span>
+        <div className="nav-rail__status">
+          <span className="nav-rail__pulse-dot" title="Telemetry Feed Live"></span>
+          <span>SYS.ONLINE</span>
+        </div>
+        {onOpenShortcuts && (
+          <button
+            type="button"
+            className="shortcut-inline-btn"
+            onClick={onOpenShortcuts}
+            title="View keyboard shortcuts"
+          >
+            ⌨️ Shortcuts <span style={{ color: 'var(--brass)', fontFamily: 'var(--font-mono)' }}>(?)</span>
+          </button>
+        )}
       </div>
     </nav>
   );
