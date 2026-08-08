@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 
+const FALLBACK_RATES = { EUR: 0.92, GBP: 0.79, JPY: 154.2, CAD: 1.36, INR: 83.9, AUD: 1.52 };
+
 export function useCurrency(baseCurrency = 'USD') {
   const [state, setState] = useState({
-    data: null,
-    isLoading: true,
+    data: { base: 'USD', date: new Date().toISOString().split('T')[0], rates: FALLBACK_RATES },
+    isLoading: false,
     isStale: false,
     error: null,
-    lastUpdated: null,
+    lastUpdated: Date.now(),
   });
 
   useEffect(() => {
@@ -16,20 +18,19 @@ export function useCurrency(baseCurrency = 'USD') {
     async function poll() {
       controller = new AbortController();
       try {
-        const url = `https://api.frankfurter.app/latest?from=${baseCurrency}`;
+        // Use free open exchange rate API with full CORS support
+        const url = `https://open.er-api.com/v6/latest/${baseCurrency}`;
         const res = await fetch(url, { signal: controller.signal });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
 
-        const transformed = {
-          base: json.base,
-          date: json.date,
-          rates: json.rates, // { EUR: 0.92, GBP: 0.78, JPY: 154.5, ... }
-        };
-
-        if (!cancelled) {
+        if (!cancelled && json.rates) {
           setState({
-            data: transformed,
+            data: {
+              base: json.base_code || baseCurrency,
+              date: json.time_last_update_utc || new Date().toISOString().split('T')[0],
+              rates: json.rates,
+            },
             isLoading: false,
             isStale: false,
             error: null,
@@ -38,12 +39,12 @@ export function useCurrency(baseCurrency = 'USD') {
         }
       } catch (err) {
         if (!cancelled && err.name !== 'AbortError') {
-          // Hardcoded forex fallback rates if offline
+          // Graceful fallback on CORS / network error
           setState({
             data: {
-              base: 'USD',
+              base: baseCurrency,
               date: new Date().toISOString().split('T')[0],
-              rates: { EUR: 0.92, GBP: 0.79, JPY: 154.2, CAD: 1.36, INR: 83.9 },
+              rates: FALLBACK_RATES,
             },
             isLoading: false,
             isStale: true,
@@ -55,7 +56,7 @@ export function useCurrency(baseCurrency = 'USD') {
     }
 
     poll();
-    const id = setInterval(poll, 30 * 60 * 1000); // 30 min poll
+    const id = setInterval(poll, 30 * 60 * 1000);
 
     return () => {
       cancelled = true;

@@ -1,5 +1,4 @@
 /* OrbitX Grid & Shell Layout (§2.4, §8) */
-@import './base.css';
 
 .app-shell {
   display: flex;
@@ -20,6 +19,7 @@
   position: relative;
   overflow-y: auto;
   overflow-x: hidden;
+  background-color: var(--void);
 }
 
 /* Common Page Container */
