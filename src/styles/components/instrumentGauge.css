@@ -1,7 +1,7 @@
 /* InstrumentGauge Component Styles (§2.4, §5, §18.3) */
 
 .instrument-gauge {
-  background: var(--panel);
+  background: linear-gradient(145deg, var(--panel-raised), var(--panel));
   border: 1px solid var(--hairline);
   border-radius: var(--radius-panel);
   padding: var(--space-4);
@@ -10,25 +10,25 @@
   justify-content: space-between;
   gap: 6px;
   min-height: 88px;
-  min-width: 0; /* Prevents flex/grid children from overflowing */
+  min-width: 0;
   box-shadow: var(--shadow-panel);
   position: relative;
-  transition: all 150ms ease-out;
+  transition: all 180ms ease-out;
   overflow: hidden;
 }
 
 .instrument-gauge:hover {
   border-color: var(--brass);
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), 0 0 15px var(--brass-glow);
 }
 
 .instrument-gauge__label {
   font-family: var(--font-display);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--parchment-dim);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
@@ -57,7 +57,7 @@
 .instrument-gauge__unit {
   font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--brass);
   white-space: nowrap;
 }
@@ -79,7 +79,7 @@
 
 .instrument-gauge--alert {
   border-left: 3px solid var(--signal);
-  box-shadow: 0 0 16px var(--signal-glow);
+  box-shadow: 0 0 18px var(--signal-glow);
 }
 
 .instrument-gauge--stale {

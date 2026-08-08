@@ -2,7 +2,8 @@
 
 .live-ticker {
   width: 100%;
-  background: var(--panel);
+  background: rgba(18, 24, 43, 0.95);
+  backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--hairline);
   padding: 6px 0;
   overflow: hidden;
@@ -13,7 +14,8 @@
   display: flex;
   align-items: center;
   user-select: none;
-  z-index: 10;
+  z-index: 15;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 .live-ticker__badge {
@@ -21,12 +23,13 @@
   border-right: 1px solid var(--hairline);
   color: var(--brass);
   padding: 0 16px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.05em;
   white-space: nowrap;
   z-index: 5;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .live-ticker__track {
