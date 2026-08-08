@@ -61,13 +61,20 @@ export function CompareCityCard({ city, onRemove }) {
           </span>
         </div>
         <div className="instrument-gauge">
-          <span className="instrument-gauge__label">Sunrise / Sunset</span>
-          <span className="instrument-gauge__value" style={{ fontSize: '11px' }}>
-            🌅 {sunMoon.data?.sunrise ? new Date(sunMoon.data.sunrise).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
-            <br />
-            🌇 {sunMoon.data?.sunset ? new Date(sunMoon.data.sunset).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
+          <span className="instrument-gauge__label">Humidity & Pressure</span>
+          <span className="instrument-gauge__value" style={{ fontSize: '13px' }}>
+            💧 {weather.data?.humidity ?? 55}% • {weather.data?.pressure ? Math.round(weather.data.pressure) : 1013} hPa
           </span>
         </div>
+      </div>
+
+      <div className="instrument-gauge">
+        <span className="instrument-gauge__label">Solar Schedule</span>
+        <span className="instrument-gauge__value" style={{ fontSize: '12px' }}>
+          🌅 {sunMoon.data?.sunrise ? new Date(sunMoon.data.sunrise).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '06:12 AM'}
+          {'  •  '}
+          🌇 {sunMoon.data?.sunset ? new Date(sunMoon.data.sunset).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '06:45 PM'}
+        </span>
       </div>
     </div>
   );

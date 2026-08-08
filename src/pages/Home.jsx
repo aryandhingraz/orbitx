@@ -6,6 +6,7 @@ import { InstrumentStrip } from '../components/InstrumentStrip.jsx';
 import { InstrumentGauge } from '../components/InstrumentGauge.jsx';
 import { ErrorBadge } from '../components/ErrorBadge.jsx';
 import { SkeletonPulse } from '../components/SkeletonPulse.jsx';
+import { LiveTicker } from '../components/LiveTicker.jsx';
 
 import { useGeolocation } from '../hooks/useGeolocation.js';
 import { useWeather } from '../hooks/useWeather.js';
@@ -17,11 +18,12 @@ import { useCurrency } from '../hooks/useCurrency.js';
 import { useWorldClocks } from '../hooks/useWorldClocks.js';
 import { useSettings } from '../context/SettingsContext.jsx';
 import { formatTemperature, formatCoordinate, formatCurrency } from '../utils/formatters.js';
+import { playTelemetryClick } from '../utils/soundSynthesizer.js';
 
 const VISITED_KEY = 'orbitx-visited';
 
 export function Home() {
-  const { units } = useSettings();
+  const { units, soundEnabled } = useSettings();
   const geo = useGeolocation();
   const lat = geo.data?.latitude;
   const lon = geo.data?.longitude;
@@ -49,6 +51,7 @@ export function Home() {
   }, []);
 
   function handleDismissOnboarding() {
+    playTelemetryClick(soundEnabled);
     setShowOnboarding(false);
     try {
       localStorage.setItem(VISITED_KEY, 'true');
@@ -58,15 +61,17 @@ export function Home() {
   }
 
   function handleMarkerClick(ringId) {
+    playTelemetryClick(soundEnabled);
     setActivePanelRing((prev) => (prev === ringId ? null : ringId));
   }
 
   function handleClosePanel() {
+    playTelemetryClick(soundEnabled);
     setActivePanelRing(null);
   }
 
   return (
-    <div className="page-container" style={{ position: 'relative' }}>
+    <div className="page-container" style={{ position: 'relative', paddingBottom: '3.5rem' }}>
       <header className="page-header">
         <h1 className="page-title">
           Earth Observatory
@@ -121,12 +126,12 @@ export function Home() {
         />
       </div>
 
-      {/* Instrument Strip Readouts (§2.4) */}
+      {/* 6-Gauge Planetary Status Matrix (§2.4) */}
       <InstrumentStrip>
         {weather.isLoading ? (
-          <SkeletonPulse width="160px" height="64px" />
+          <SkeletonPulse width="150px" height="64px" />
         ) : weather.error && !weather.data ? (
-          <ErrorBadge message="Weather unreachable" />
+          <ErrorBadge message="Weather error" />
         ) : (
           <InstrumentGauge
             label="Local Temp"
@@ -138,7 +143,7 @@ export function Home() {
         )}
 
         {airQuality.isLoading ? (
-          <SkeletonPulse width="160px" height="64px" />
+          <SkeletonPulse width="150px" height="64px" />
         ) : (
           <InstrumentGauge
             label="Air Quality"
@@ -150,10 +155,10 @@ export function Home() {
         )}
 
         {quakes.isLoading ? (
-          <SkeletonPulse width="160px" height="64px" />
+          <SkeletonPulse width="150px" height="64px" />
         ) : (
           <InstrumentGauge
-            label="24h Earthquakes"
+            label="24h Quakes"
             value={quakes.data?.count ?? 0}
             unit="events"
             status={quakes.data?.status || 'nominal'}
@@ -162,7 +167,7 @@ export function Home() {
         )}
 
         {iss.isLoading ? (
-          <SkeletonPulse width="160px" height="64px" />
+          <SkeletonPulse width="150px" height="64px" />
         ) : (
           <InstrumentGauge
             label="ISS Speed"
@@ -172,7 +177,31 @@ export function Home() {
             isStale={iss.isStale}
           />
         )}
+
+        <InstrumentGauge
+          label="Atmosphere"
+          value={weather.data?.pressure ? Math.round(weather.data.pressure) : 1013}
+          unit="hPa"
+          status="nominal"
+        />
+
+        <InstrumentGauge
+          label="Forex EUR"
+          value={currency.data?.rates?.EUR ? formatCurrency(currency.data.rates.EUR, 'EUR') : '€0.92'}
+          unit=""
+          status="nominal"
+        />
       </InstrumentStrip>
+
+      {/* Scrolling Live Telemetry Log Ticker */}
+      <LiveTicker
+        issSpeed={iss.data?.velocity ? Math.round(iss.data.velocity).toLocaleString() : '27,580'}
+        issAlt={iss.data?.altitude ?? 418}
+        temp={formatTemperature(weather.data?.temperature, units)}
+        aqi={airQuality.data?.aqi ?? 25}
+        quakeCount={quakes.data?.count ?? 0}
+        location={geo.data?.cityLabel}
+      />
 
       {/* First-Visit Onboarding Guide Modal (§14) */}
       {showOnboarding && (

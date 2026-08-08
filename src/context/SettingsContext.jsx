@@ -7,6 +7,7 @@ const defaults = {
   theme: 'auto',          // "auto" | "day" | "night"
   refreshRate: 'live',    // "live" | "balanced" | "battery-saver"
   defaultCity: null,      // { name, lat, lon } or null -> default to geolocation
+  soundEnabled: true,     // Web Audio synthesizer feedback
 };
 
 const SettingsContext = createContext(defaults);
@@ -35,7 +36,6 @@ export function SettingsProvider({ children }) {
     let resolvedTheme = settings.theme;
     if (settings.theme === 'auto') {
       const hour = new Date().getHours();
-      // Daytime between 6 AM and 6 PM
       resolvedTheme = hour >= 6 && hour < 18 ? 'day' : 'night';
     }
 
