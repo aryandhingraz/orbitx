@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Globe } from '../globe/Globe.jsx';
 import { OrbitRing } from '../components/OrbitRing.jsx';
 import { DataPanel } from '../components/DataPanel.jsx';
@@ -16,7 +16,9 @@ import { useQuakes } from '../hooks/useQuakes.js';
 import { useCurrency } from '../hooks/useCurrency.js';
 import { useWorldClocks } from '../hooks/useWorldClocks.js';
 import { useSettings } from '../context/SettingsContext.jsx';
-import { formatTemperature, formatWindSpeed, formatCoordinate, formatCurrency } from '../utils/formatters.js';
+import { formatTemperature, formatCoordinate, formatCurrency } from '../utils/formatters.js';
+
+const VISITED_KEY = 'orbitx-visited';
 
 export function Home() {
   const { units } = useSettings();
@@ -33,6 +35,27 @@ export function Home() {
   const worldClocks = useWorldClocks();
 
   const [activePanelRing, setActivePanelRing] = useState(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    try {
+      const visited = localStorage.getItem(VISITED_KEY);
+      if (!visited) {
+        setShowOnboarding(true);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  function handleDismissOnboarding() {
+    setShowOnboarding(false);
+    try {
+      localStorage.setItem(VISITED_KEY, 'true');
+    } catch {
+      // ignore
+    }
+  }
 
   function handleMarkerClick(ringId) {
     setActivePanelRing((prev) => (prev === ringId ? null : ringId));
@@ -151,9 +174,39 @@ export function Home() {
         )}
       </InstrumentStrip>
 
+      {/* First-Visit Onboarding Guide Modal (§14) */}
+      {showOnboarding && (
+        <DataPanel isOpen={true} title="Welcome to OrbitX Observatory" onClose={handleDismissOnboarding}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontFamily: 'var(--font-body)', fontSize: '14px' }}>
+            <p style={{ color: 'var(--brass)', fontWeight: 600 }}>
+              🌍 AN ANTIQUE OBSERVATORY DESK REBUILT WITH MODERN WEBGL TELEMETRY SENSORS
+            </p>
+            <p>
+              OrbitX tracks planet Earth in real time using concentric orbit rings surrounding a WebGL globe:
+            </p>
+            <ul style={{ paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <li><strong>Outer Ring:</strong> Global World Clocks (1s tick) & Forex exchange rates.</li>
+              <li><strong>Mid Ring:</strong> ISS Space Station live position (updated every 5 seconds).</li>
+              <li><strong>Inner Ring:</strong> Solar Terminator & Conway Lunar synodic phase.</li>
+            </ul>
+            <p style={{ color: 'var(--parchment-dim)' }}>
+              Click any glowing brass ring marker to pause rotation and inspect live telemetry drawers!
+            </p>
+            <button
+              type="button"
+              className="journal-btn"
+              style={{ marginTop: '12px', textAlign: 'center', justifyContent: 'center' }}
+              onClick={handleDismissOnboarding}
+            >
+              INITIALIZE OBSERVATORY DESK
+            </button>
+          </div>
+        </DataPanel>
+      )}
+
       {/* Sliding Telemetry Data Panel (§2.5, §5) */}
       <DataPanel
-        isOpen={activePanelRing !== null}
+        isOpen={activePanelRing !== null && !showOnboarding}
         title={
           activePanelRing === 'inner'
             ? 'Solar Terminator & Lunar Telemetry'
