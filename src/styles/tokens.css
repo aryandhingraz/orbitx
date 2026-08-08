@@ -1,0 +1,73 @@
+/* OrbitX Design System — Design Tokens (§2.1) */
+
+:root {
+  /* Base Surfaces — Dark Observatory Theme (Default) */
+  --void:          #0B0E1A;
+  --panel:         #141A2E;
+  --panel-raised:  #1B2340;
+  --hairline:      rgba(201, 162, 39, 0.18);
+
+  /* Accents — Line work, glows, small fills */
+  --brass:           #C9A227;
+  --brass-glow:      rgba(201, 162, 39, 0.35);
+  --verdigris:       #5FBFA9;
+  --verdigris-glow:  rgba(95, 191, 169, 0.30);
+
+  /* Text & Telemetry */
+  --parchment:      #ECE6D6;
+  --parchment-dim:  #A9A38F;
+
+  /* Status Colors (Reserved strictly for genuine telemetry states) */
+  --signal:       #E2604F;
+  --signal-glow:  rgba(226, 96, 79, 0.30);
+  --nominal:      #5FBFA9;
+
+  /* Elevation & Glows */
+  --shadow-panel: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-ring:  0 0 24px var(--brass-glow);
+
+  /* Typography Roles */
+  --font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-body:    'Source Serif 4', Georgia, serif;
+  --font-mono:    'IBM Plex Mono', monospace;
+
+  /* 7-Point Type Scale (§2.2) */
+  --text-xs:   0.75rem;    /* 12px */
+  --text-sm:   0.875rem;   /* 14px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg:   1.25rem;    /* 20px */
+  --text-xl:   1.75rem;    /* 28px */
+  --text-2xl:  2.75rem;    /* 44px */
+  --text-3xl:  4rem;       /* 64px */
+
+  /* Spacing Scale (§2.3) */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-12: 48px;
+
+  /* Radii */
+  --radius-panel: 10px;
+  --radius-pill:  999px;
+  --radius-sm:    4px;
+
+  /* Transitions */
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-panel:    cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Day Mode Override (§2.1) */
+[data-theme="day"] {
+  --void:          #EDE6D3;
+  --panel:         #FBF8F0;
+  --panel-raised:  #F2ECDD;
+  --parchment:     #1B1A16;
+  --parchment-dim: #6B6455;
+  --hairline:      rgba(140, 106, 20, 0.22);
+  --brass:         #B88E18;
+  --brass-glow:    rgba(184, 142, 24, 0.25);
+  --shadow-panel:  0 8px 24px rgba(0, 0, 0, 0.08);
+}

@@ -1,0 +1,206 @@
+/* NavRail Component Styles (§2.4, §4, §8) */
+
+.nav-rail {
+  width: 220px;
+  height: 100vh;
+  background-color: var(--panel);
+  border-right: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-6) var(--space-4);
+  z-index: 10;
+  flex-shrink: 0;
+  transition: width 200ms ease;
+}
+
+/* Header & Wordmark */
+.nav-rail__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-2) var(--space-6);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.nav-rail__logo {
+  width: 28px;
+  height: 28px;
+  color: var(--brass);
+  flex-shrink: 0;
+}
+
+.nav-rail__wordmark {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--parchment);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Nav Menu & Items */
+.nav-rail__menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+  list-style: none;
+}
+
+.nav-rail__item {
+  width: 100%;
+}
+
+.nav-rail__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-panel);
+  color: var(--parchment-dim);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  min-height: 44px; /* Minimum tap target */
+  transition: all 150ms ease-out;
+  border: 1px solid transparent;
+}
+
+.nav-rail__link:hover {
+  color: var(--parchment);
+  background-color: var(--panel-raised);
+  transform: translateX(2px);
+}
+
+.nav-rail__link--active {
+  color: var(--brass);
+  background-color: var(--panel-raised);
+  border-color: var(--hairline);
+  box-shadow: 0 0 12px var(--brass-glow);
+}
+
+.nav-rail__icon {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.75;
+  stroke: currentColor;
+  fill: none;
+  flex-shrink: 0;
+}
+
+.nav-rail__label {
+  white-space: nowrap;
+}
+
+/* Footer Status indicator */
+.nav-rail__footer {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--hairline);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--parchment-dim);
+}
+
+.nav-rail__pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--nominal);
+  box-shadow: 0 0 8px var(--nominal);
+  animation: statusPulse 2s infinite ease-in-out;
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* Responsive Behavior (§8) */
+/* Tablet 640px – 1023px: Icon-only sidebar */
+@media (max-width: 1023px) and (min-width: 640px) {
+  .nav-rail {
+    width: 68px;
+    padding: var(--space-4) var(--space-2);
+  }
+  .nav-rail__wordmark, 
+  .nav-rail__label,
+  .nav-rail__footer span {
+    display: none;
+  }
+  .nav-rail__header {
+    justify-content: center;
+    padding: var(--space-2) 0 var(--space-4);
+  }
+  .nav-rail__link {
+    justify-content: center;
+    padding: var(--space-3);
+  }
+  .nav-rail__link:hover {
+    transform: none;
+  }
+  .nav-rail__footer {
+    justify-content: center;
+  }
+}
+
+/* Mobile <640px: Bottom Tab Bar */
+@media (max-width: 639px) {
+  .nav-rail {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: 60px;
+    flex-direction: row;
+    padding: 0 var(--space-2);
+    border-right: none;
+    border-top: 1px solid var(--hairline);
+    background-color: var(--panel);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+  }
+
+  .nav-rail__header, 
+  .nav-rail__footer {
+    display: none;
+  }
+
+  .nav-rail__menu {
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+    margin-top: 0;
+    align-items: center;
+  }
+
+  .nav-rail__item {
+    width: auto;
+    flex: 1;
+  }
+
+  .nav-rail__link {
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-1);
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    min-height: 48px;
+    font-size: 10px;
+  }
+
+  .nav-rail__link:hover {
+    transform: none;
+  }
+
+  .nav-rail__icon {
+    width: 18px;
+    height: 18px;
+  }
+}
