@@ -6,32 +6,32 @@ export function About() {
       <header className="page-header">
         <h1 className="page-title">
           About OrbitX
-          <span className="page-title__tag">RUBRIC ALIGNED</span>
+          <span className="page-title__tag">ORBITX-SPEC</span>
         </h1>
         <p className="page-subtitle">
-          Architecture rationale, WebGL DOM showcase, & API telemetry attribution
+          Observatory concept rationale, WebGL 3D architecture, & telemetry API attributions
         </p>
       </header>
 
       <article className="about-article">
-        {/* Evaluator Highlight Box (§4.6, §13, §17) */}
+        {/* Technical Architecture Highlight Box */}
         <div className="about-highlight-box">
           <p style={{ color: 'var(--brass)', fontWeight: 600, marginBottom: '6px' }}>
-            📌 EVALUATOR NOTICE — BECSE FRONT END ENGINEERING II EVALUATION-I
+            🛸 PURE VANILLA WEBGL ENGINE & ISOLATED REACT COMPOSITION
           </p>
           <p>
-            OrbitX isolates pure Vanilla JS DOM / WebGL manipulation inside the isolated{' '}
-            <code style={{ color: 'var(--verdigris)' }}>src/globe/globeEngine.js</code> module to satisfy Component 2 (DOM Manipulation), while keeping the main React 18 component tree cleanly composed in <code style={{ color: 'var(--verdigris)' }}>src/components/</code> and <code style={{ color: 'var(--verdigris)' }}>src/pages/</code>.
+            OrbitX isolates pure Vanilla JS WebGL manipulation inside the dedicated{' '}
+            <code style={{ color: 'var(--verdigris)' }}>src/globe/globeEngine.js</code> module — zero React imports inside the engine! It manages Three.js scene graphs, 3D satellite orbit trails, procedural canvas textures, atmosphere shaders, drag-to-rotate controls, and clean WebGL context disposal (<code style={{ color: 'var(--verdigris)' }}>dispose()</code>) on unmount.
           </p>
         </div>
 
         <section>
-          <h2 className="about-section-title">Concept & Aesthetic Philosophy</h2>
+          <h2 className="about-section-title">Observatory Aesthetic Rationale</h2>
           <p>
-            OrbitX is designed as an antique observatory desk rebuilt with modern WebGL telemetry sensors — brass dials, hand-ruled orbit rings, tabular typography, and a glowing Earth at the center reporting live data from free public APIs across six routed pages.
+            OrbitX is designed as an antique observatory desk rebuilt with modern telemetry sensors — brass dials, hand-ruled concentric orbit rings, tabular typography, and a glowing WebGL Earth reporting real-time data from 9 keyless public APIs acrossrouted pages.
           </p>
           <p style={{ marginTop: '12px' }}>
-            Unlike generic AI dashboards using black + neon, OrbitX uses a precise navy, brass, verdigris, and parchment palette borrowed from vintage chronometers and astronomical instruments.
+            Unlike generic AI dashboards using flat neon cards, OrbitX uses a precise navy, brass, verdigris, and parchment palette borrowed from vintage chronometers and astronomical instruments.
           </p>
         </section>
 
@@ -59,19 +59,18 @@ export function About() {
               <p style={{ marginTop: '4px', color: 'var(--parchment-dim)' }}>Solar terminator calculation & local sunrise/sunset schedules</p>
             </div>
             <div className="about-api-card">
-              <span style={{ color: 'var(--brass)', fontWeight: 600 }}>Frankfurter Exchange API</span>
+              <span style={{ color: 'var(--brass)', fontWeight: 600 }}>Open ER Forex API</span>
               <p style={{ marginTop: '4px', color: 'var(--parchment-dim)' }}>Global currency exchange rates (USD, EUR, GBP, JPY, INR)</p>
             </div>
           </div>
         </section>
 
         <section>
-          <h2 className="about-section-title">Syllabus & Rubric Alignment (§17)</h2>
+          <h2 className="about-section-title">Astronomical Telemetry Mathematics</h2>
           <ul style={{ paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <li><strong>Lectures 1–6 (HTML5 & CSS3):</strong> Semantic tags, CSS custom property tokens, Flexbox, CSS Grid layout shell, 5 responsive breakpoints (320px–1440px).</li>
-            <li><strong>Lectures 13–18 (ES6+ & Async):</strong> Async/await, Fetch API with AbortController, local storage persistence, DOM manipulation, Conway synodic moon math.</li>
-            <li><strong>Lectures 25–36 (React Basics & Hooks):</strong> Functional components, props, state, custom data hooks, useContext for Settings, memoization.</li>
-            <li><strong>Lectures 37–42 (React Router):</strong> HashRouter with 6 active routed pages and route transitions.</li>
+            <li><strong>Conway Synodic Lunar Algorithm:</strong> Computes current lunar age (0..29.53 days), synodic illumination percentage, and moon phase glyphs locally without external network dependencies.</li>
+            <li><strong>Spherical Coordinate Transformations:</strong> Converts geodetic latitude & longitude into 360° ring rotation angles and 3D WebGL Cartesian vector coordinates (<code style={{ color: 'var(--brass)' }}>Vector3(x, y, z)</code>).</li>
+            <li><strong>Web Audio Synthesizer:</strong> Pure Vanilla JS Web Audio API oscillators synthesizing observatory clicks and satellite pulse pings without audio assets.</li>
           </ul>
         </section>
       </article>

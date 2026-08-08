@@ -2,8 +2,7 @@
 
 .live-ticker {
   width: 100%;
-  background: rgba(20, 26, 46, 0.95);
-  border-top: 1px solid var(--hairline);
+  background: var(--panel);
   border-bottom: 1px solid var(--hairline);
   padding: 6px 0;
   overflow: hidden;
@@ -14,13 +13,14 @@
   display: flex;
   align-items: center;
   user-select: none;
+  z-index: 10;
 }
 
 .live-ticker__badge {
   background: var(--panel-raised);
   border-right: 1px solid var(--hairline);
   color: var(--brass);
-  padding: 0 12px;
+  padding: 0 16px;
   font-weight: 600;
   white-space: nowrap;
   z-index: 5;
@@ -31,9 +31,9 @@
 
 .live-ticker__track {
   display: flex;
-  gap: 32px;
+  gap: 36px;
   white-space: nowrap;
-  animation: tickerScroll 30s linear infinite;
+  animation: tickerScroll 35s linear infinite;
   will-change: transform;
 }
 
@@ -58,6 +58,6 @@
 
 @media (max-width: 639px) {
   .live-ticker {
-    display: none; /* Hide on mobile to conserve screen space */
+    display: none;
   }
 }

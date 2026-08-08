@@ -6,7 +6,6 @@ import { InstrumentStrip } from '../components/InstrumentStrip.jsx';
 import { InstrumentGauge } from '../components/InstrumentGauge.jsx';
 import { ErrorBadge } from '../components/ErrorBadge.jsx';
 import { SkeletonPulse } from '../components/SkeletonPulse.jsx';
-import { LiveTicker } from '../components/LiveTicker.jsx';
 
 import { useGeolocation } from '../hooks/useGeolocation.js';
 import { useWeather } from '../hooks/useWeather.js';
@@ -71,7 +70,7 @@ export function Home() {
   }
 
   return (
-    <div className="page-container" style={{ position: 'relative', paddingBottom: '3.5rem' }}>
+    <div className="page-container" style={{ position: 'relative' }}>
       <header className="page-header">
         <h1 className="page-title">
           Earth Observatory
@@ -129,7 +128,7 @@ export function Home() {
       {/* 6-Gauge Planetary Status Matrix (§2.4) */}
       <InstrumentStrip>
         {weather.isLoading ? (
-          <SkeletonPulse width="150px" height="64px" />
+          <SkeletonPulse width="165px" height="68px" />
         ) : weather.error && !weather.data ? (
           <ErrorBadge message="Weather error" />
         ) : (
@@ -143,7 +142,7 @@ export function Home() {
         )}
 
         {airQuality.isLoading ? (
-          <SkeletonPulse width="150px" height="64px" />
+          <SkeletonPulse width="165px" height="68px" />
         ) : (
           <InstrumentGauge
             label="Air Quality"
@@ -155,7 +154,7 @@ export function Home() {
         )}
 
         {quakes.isLoading ? (
-          <SkeletonPulse width="150px" height="64px" />
+          <SkeletonPulse width="165px" height="68px" />
         ) : (
           <InstrumentGauge
             label="24h Quakes"
@@ -167,7 +166,7 @@ export function Home() {
         )}
 
         {iss.isLoading ? (
-          <SkeletonPulse width="150px" height="64px" />
+          <SkeletonPulse width="165px" height="68px" />
         ) : (
           <InstrumentGauge
             label="ISS Speed"
@@ -192,16 +191,6 @@ export function Home() {
           status="nominal"
         />
       </InstrumentStrip>
-
-      {/* Scrolling Live Telemetry Log Ticker */}
-      <LiveTicker
-        issSpeed={iss.data?.velocity ? Math.round(iss.data.velocity).toLocaleString() : '27,580'}
-        issAlt={iss.data?.altitude ?? 418}
-        temp={formatTemperature(weather.data?.temperature, units)}
-        aqi={airQuality.data?.aqi ?? 25}
-        quakeCount={quakes.data?.count ?? 0}
-        location={geo.data?.cityLabel}
-      />
 
       {/* First-Visit Onboarding Guide Modal (§14) */}
       {showOnboarding && (
