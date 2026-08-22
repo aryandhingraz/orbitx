@@ -1,4 +1,4 @@
-/* OrbitX Base Styles & Resets */
+/* OrbitX Base Styles, Resets & Global Component Primitives */
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -10,8 +10,8 @@ html, body {
   width: 100%;
   height: 100%;
   overflow-x: hidden;
-  background-color: var(--void);
-  color: var(--parchment);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.5;
@@ -23,31 +23,48 @@ html, body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--void);
-  color: var(--parchment);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
 }
 
-/* Tabular numbers for all telemetry data */
-.font-mono, 
-[data-value], 
-.telemetry-val, 
-.gauge-val {
+/* Global Text Overflow Protocol (§3) */
+p, h1, h2, h3, h4, h5, h6, span, div, td, th, label {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Flexbox overflow fix helper */
+.min-w-0 {
+  min-width: 0 !important;
+}
+
+.text-truncate {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Tabular numbers for telemetry data */
+.font-mono,
+[data-value],
+.telemetry-val,
+.gauge-val,
+.mono-num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 
-/* Accessibility Focus States (§2.7) */
+/* Focus States (§2.7) */
 :focus {
   outline: none;
 }
 
 :focus-visible {
-  outline: 2px solid var(--brass);
-  outline-offset: 3px;
-  box-shadow: 0 0 10px var(--brass-glow);
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
 }
 
-/* Buttons and Clickables */
+/* Buttons and Inputs */
 button, input, select, textarea {
   font: inherit;
   color: inherit;
@@ -57,6 +74,205 @@ button {
   background: none;
   border: none;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  transition: background-color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+}
+
+/* Nike Component Primitives (§2.4, §5.1) */
+
+/* 1. Primary Button */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  background-color: var(--color-ink);
+  color: var(--color-on-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-button-md);
+  font-weight: 500;
+  line-height: 1.5;
+  border-radius: var(--radius-lg);
+  padding: 0 24px;
+  height: 48px;
+  border: 1px solid var(--color-ink);
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* 2. Secondary Button (§5.1 Fix for <label> as button) */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  background-color: var(--color-soft-cloud);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-button-md);
+  font-weight: 500;
+  line-height: 1.5;
+  border-radius: var(--radius-lg);
+  padding: 0 24px;
+  height: 48px;
+  border: 1px solid var(--color-hairline);
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-soft-cloud-subtle);
+  border-color: var(--color-ash);
+}
+
+/* 3. Circular Icon Button */
+.btn-icon-circular {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-soft-cloud);
+  color: var(--color-ink);
+  border: 1px solid var(--color-hairline);
+  padding: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.btn-icon-circular:hover {
+  background-color: var(--color-soft-cloud-subtle);
+}
+
+/* 4. Filter Chips / Tabs */
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-caption-md);
+  font-weight: 500;
+  border-radius: var(--radius-lg);
+  padding: 6px 16px;
+  border: 1px solid var(--color-hairline);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.filter-chip:hover {
+  border-color: var(--color-ash);
+}
+
+.filter-chip--active, .filter-chip[data-active="true"] {
+  background-color: var(--color-ink);
+  color: var(--color-on-primary);
+  border-color: var(--color-ink);
+}
+
+/* 5. Search Pill Input */
+.search-pill-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.search-pill {
+  width: 100%;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-soft-cloud);
+  color: var(--color-ink);
+  border: 1px solid var(--color-hairline);
+  padding: 0 16px 0 40px;
+  font-family: var(--font-body);
+  font-size: var(--text-body-md);
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.search-pill:focus {
+  background-color: var(--color-canvas);
+  border-color: var(--color-ink);
+}
+
+.search-pill-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--color-mute);
+  pointer-events: none;
+}
+
+/* 6. Data Widget Card (Flat 0px Radius, 0 Shadow) */
+.data-widget-card {
+  background-color: var(--color-soft-cloud);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-none);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+}
+
+/* 7. Badges */
+.badge-promo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-caption-sm);
+  font-weight: 500;
+  border-radius: var(--radius-lg);
+  padding: 3px 10px;
+  border: 1px solid var(--color-hairline);
+  white-space: nowrap;
+}
+
+.badge-sale-text {
+  color: var(--color-sale);
+  font-weight: 600;
+}
+
+.badge-success-text {
+  color: var(--color-success-bright);
+  font-weight: 600;
+}
+
+/* 8. Status Swatch Dot */
+.swatch-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-success-bright);
+  flex-shrink: 0;
+}
+
+.swatch-dot--alert {
+  background-color: var(--color-sale);
+}
+
+.swatch-dot--info {
+  background-color: var(--color-info);
 }
 
 /* Custom Scrollbars */
@@ -65,15 +281,15 @@ button {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--void);
+  background: var(--color-canvas);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--panel-raised);
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--hairline);
+  background: var(--color-soft-cloud-subtle);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-hairline);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--brass);
+  background: var(--color-ash);
 }
 
 /* Reduced Motion Support (§2.6) */

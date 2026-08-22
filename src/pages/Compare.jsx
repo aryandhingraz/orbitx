@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGeocodingSearch } from '../hooks/useGeocodingSearch.js';
+import { useMultiCityTelemetry } from '../hooks/useMultiCityTelemetry.js';
 import { CompareCityCard } from '../components/CompareCityCard.jsx';
 import { RadarChart } from '../components/RadarChart.jsx';
+import { Legend } from '../components/Legend.jsx';
+import { RADAR_CITY_COLORS } from '../utils/colorTokens.js';
 import '../styles/components/compare.css';
 
 const DEFAULT_CITIES = [
@@ -11,11 +14,31 @@ const DEFAULT_CITIES = [
   { id: 4, name: 'Sydney', country: 'Australia', latitude: -33.8688, longitude: 151.2093 },
 ];
 
+const COMPARE_KEY = 'orbitx-compare-cities';
+
 export function Compare() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [cities, setCities] = useState(DEFAULT_CITIES);
+  const [cities, setCities] = useState(() => {
+    try {
+      const saved = localStorage.getItem(COMPARE_KEY);
+      return saved ? JSON.parse(saved) : DEFAULT_CITIES;
+    } catch {
+      return DEFAULT_CITIES;
+    }
+  });
+
+  const [viewMode, setViewMode] = useState('gauges'); // 'gauges' | 'table'
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(COMPARE_KEY, JSON.stringify(cities));
+    } catch {
+      // ignore
+    }
+  }, [cities]);
 
   const { results, isLoading } = useGeocodingSearch(searchTerm);
+  const multiTelemetry = useMultiCityTelemetry(cities);
 
   function handleSelectCity(city) {
     if (cities.length >= 4) {
@@ -34,16 +57,30 @@ export function Compare() {
     setCities((prev) => prev.filter((c) => c.id !== id));
   }
 
-  // Prepared normalized values for RadarChart
-  const radarData = cities.map((c, idx) => ({
-    name: c.name,
-    normalizedValues: [
-      0.4 + (idx * 0.15) % 0.5,
-      0.3 + (idx * 0.2) % 0.6,
-      0.5 + (idx * 0.1) % 0.4,
-      0.7 - (idx * 0.1) % 0.3,
-      0.6 + (idx * 0.1) % 0.3,
-    ],
+  const radarData = cities.map((c) => {
+    const t = multiTelemetry[c.id];
+    const temp = t?.weather?.temperature ?? 15;
+    const aqi = t?.airQuality?.aqi ?? 25;
+    const wind = t?.weather?.windSpeed ?? 12;
+    const press = t?.weather?.pressure ?? 1013;
+    const hum = t?.weather?.humidity ?? 65;
+
+    const tempNorm = Math.max(0.1, Math.min(1.0, (temp + 10) / 50));
+    const aqiNorm = Math.max(0.1, Math.min(1.0, 1.0 - (aqi / 200)));
+    const windNorm = Math.max(0.1, Math.min(1.0, wind / 60));
+    const pressNorm = Math.max(0.1, Math.min(1.0, (press - 980) / 60));
+    const humNorm = Math.max(0.1, Math.min(1.0, hum / 100));
+
+    return {
+      name: c.name,
+      normalizedValues: [tempNorm, aqiNorm, windNorm, pressNorm, humNorm],
+    };
+  });
+
+  // Radar Legend Items mapped 1:1 to compared cities (§2.2 Item 4)
+  const radarLegendItems = cities.map((c, idx) => ({
+    color: RADAR_CITY_COLORS[idx % RADAR_CITY_COLORS.length].css,
+    label: c.name,
   }));
 
   return (
@@ -58,55 +95,136 @@ export function Compare() {
         </p>
       </header>
 
-      {/* City Search Input (§4.3) */}
-      <div className="compare-search">
-        <input
-          type="text"
-          className="compare-search__input"
-          placeholder="🔍 Search city to compare (e.g. Paris, Cairo, New Delhi)..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          aria-label="Search city name for comparison"
-        />
+      {/* Control Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-md)' }}>
+        <div className="compare-search min-w-0">
+          <div className="search-pill-wrapper">
+            <span className="search-pill-icon">🔍</span>
+            <input
+              type="text"
+              className="search-pill"
+              placeholder="Search city to add for comparison (e.g. Paris, Cairo, New Delhi)..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Search city name for comparison"
+            />
+          </div>
 
-        {/* Dropdown Results */}
-        {searchTerm.trim().length >= 2 && (
-          <ul className="compare-search__dropdown">
-            {isLoading ? (
-              <li className="compare-search__option">Searching telemetry database...</li>
-            ) : results.length === 0 ? (
-              <li className="compare-search__option">No cities found matching "{searchTerm}"</li>
-            ) : (
-              results.map((city) => (
-                <li
-                  key={city.id}
-                  className="compare-search__option"
-                  onClick={() => handleSelectCity(city)}
-                >
-                  <span style={{ fontWeight: 600 }}>{city.name}</span>
-                  <span style={{ fontSize: '12px', color: 'var(--parchment-dim)' }}>
-                    {city.country} ({city.latitude.toFixed(2)}°, {city.longitude.toFixed(2)}°)
-                  </span>
-                </li>
-              ))
-            )}
-          </ul>
-        )}
+          {searchTerm.trim().length >= 2 && (
+            <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: 'var(--color-canvas)', border: '1px solid var(--color-hairline)', borderRadius: 'var(--radius-none)', zIndex: 50 }}>
+              {isLoading ? (
+                <div style={{ padding: '12px 16px', color: 'var(--color-mute)' }}>Searching telemetry database...</div>
+              ) : results.length === 0 ? (
+                <div style={{ padding: '12px 16px', color: 'var(--color-mute)' }}>No cities found matching "{searchTerm}"</div>
+              ) : (
+                results.map((city) => (
+                  <button
+                    key={city.id}
+                    type="button"
+                    style={{ width: '100%', padding: '12px 16px', textAlign: 'left', borderBottom: '1px solid var(--color-hairline-soft)', color: 'var(--color-ink)', cursor: 'pointer', background: 'transparent', display: 'flex', justifyContent: 'space-between' }}
+                    onClick={() => handleSelectCity(city)}
+                  >
+                    <strong>{city.name}</strong>
+                    <span style={{ fontSize: 'var(--text-caption-sm)', color: 'var(--color-mute)' }}>
+                      {city.country} ({city.latitude.toFixed(2)}°, {city.longitude.toFixed(2)}°)
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* View Mode Tabs */}
+        <div className="tab-strip">
+          <button
+            type="button"
+            className={`filter-chip ${viewMode === 'gauges' ? 'filter-chip--active' : ''}`}
+            onClick={() => setViewMode('gauges')}
+          >
+            Gauge View
+          </button>
+          <button
+            type="button"
+            className={`filter-chip ${viewMode === 'table' ? 'filter-chip--active' : ''}`}
+            onClick={() => setViewMode('table')}
+          >
+            Table View
+          </button>
+        </div>
       </div>
 
-      {/* Multi-Metric Canvas Radar Visualization */}
-      <RadarChart citiesData={radarData} />
-
-      {/* Side-by-Side Comparison Cards (§4.3) */}
-      <div className="compare-grid">
-        {cities.map((city) => (
-          <CompareCityCard
-            key={city.id}
-            city={city}
-            onRemove={() => handleRemoveCity(city.id)}
-          />
-        ))}
+      {/* Multi-Metric Canvas Radar Visualization with Legend (§2.2 Item 4) */}
+      <div>
+        <RadarChart citiesData={radarData} />
+        <Legend title="RADAR CITY COLOR KEY" items={radarLegendItems} />
       </div>
+
+      {/* View Mode Content Render */}
+      {viewMode === 'gauges' ? (
+        <div className="compare-grid">
+          {cities.map((city) => (
+            <CompareCityCard
+              key={city.id}
+              city={city}
+              weatherData={multiTelemetry[city.id]?.weather}
+              aqiData={multiTelemetry[city.id]?.airQuality}
+              onRemove={() => handleRemoveCity(city.id)}
+            />
+          ))}
+        </div>
+      ) : (
+        /* Table View with AQI Legend (§2.2 Item 5) */
+        <div className="compare-table-container">
+          <Legend title="TABLE AQI STATUS KEY" items={[
+            { color: 'var(--color-success-bright)', label: 'Good AQI (0 - 50)' },
+            { color: 'var(--color-info)', label: 'Moderate AQI (51 - 150)' },
+            { color: 'var(--color-sale)', label: 'Unhealthy AQI (> 150)' },
+          ]} />
+
+          <table className="compare-table" style={{ marginTop: 'var(--space-xs)' }}>
+            <thead>
+              <tr>
+                <th>City Name</th>
+                <th>Coordinates</th>
+                <th>Country</th>
+                <th>Telemetry Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cities.map((city) => {
+                const aqiInfo = multiTelemetry[city.id]?.airQuality;
+                const statusCategory = aqiInfo?.category || 'GOOD AQI';
+                const statusColor = aqiInfo?.statusColor || 'var(--color-success-bright)';
+
+                return (
+                  <tr key={city.id}>
+                    <td style={{ fontWeight: 600 }}>{city.name}</td>
+                    <td className="font-mono">{city.latitude.toFixed(2)}°, {city.longitude.toFixed(2)}°</td>
+                    <td>{city.country}</td>
+                    <td>
+                      <span className="badge-promo" style={{ color: statusColor, borderColor: statusColor }}>
+                        {statusCategory}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="badge-sale-text"
+                        onClick={() => handleRemoveCity(city.id)}
+                        style={{ cursor: 'pointer', background: 'none', border: 'none' }}
+                      >
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

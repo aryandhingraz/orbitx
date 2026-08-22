@@ -21,15 +21,14 @@
 
 .orbit-ring-track {
   fill: none;
-  stroke: var(--hairline);
+  stroke: var(--color-hairline);
   stroke-width: 1.5;
   stroke-dasharray: 4 6;
 }
 
 .orbit-ring-track--active {
-  stroke: var(--brass);
+  stroke: var(--color-accent-teal);
   stroke-dasharray: none;
-  filter: drop-shadow(0 0 8px var(--brass-glow));
 }
 
 /* Continuous Rotation Keyframes (§2.5) */

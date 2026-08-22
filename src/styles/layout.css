@@ -1,12 +1,12 @@
-/* OrbitX Grid & Shell Layout (§2.4, §8) */
+/* OrbitX Grid & Responsive Layout (§2.4, §8, Nike Specs) */
 
 .app-shell {
   display: flex;
   min-height: 100vh;
   width: 100vw;
   position: relative;
-  background-color: var(--void);
-  color: var(--parchment);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
   overflow-x: hidden;
 }
 
@@ -19,22 +19,23 @@
   position: relative;
   overflow-y: auto;
   overflow-x: hidden;
-  background-color: var(--void);
+  background-color: var(--color-canvas);
 }
 
-/* Common Page Container */
+/* Page Container — 1440px Max Width Desktop (§6) */
 .page-container {
   flex: 1;
   width: 100%;
-  max-width: 1240px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: var(--space-6);
-  padding-bottom: 80px; /* Clearance for floating action badges */
+  padding: var(--space-section) var(--space-xl);
+  padding-bottom: 80px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-section);
   animation: pageFadeIn 180ms ease;
   z-index: 2;
+  min-width: 0;
 }
 
 @keyframes pageFadeIn {
@@ -46,64 +47,82 @@
 .page-header {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-  border-bottom: 1px solid var(--hairline);
-  padding-bottom: var(--space-4);
+  gap: var(--space-xs);
+  border-bottom: 1px solid var(--color-hairline);
+  padding-bottom: var(--space-xl);
 }
 
 .page-title {
   font-family: var(--font-display);
-  font-size: var(--text-xl);
+  font-size: var(--text-heading-xl);
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--parchment);
+  color: var(--color-ink);
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-md);
   flex-wrap: wrap;
+  line-height: 1.1;
 }
 
 .page-title__tag {
   font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  color: var(--brass);
-  border: 1px solid var(--hairline);
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
-  background: var(--panel-raised);
+  font-size: var(--text-caption-sm);
+  color: var(--color-accent-teal);
+  border: 1px solid var(--color-hairline);
+  padding: 2px 10px;
+  border-radius: var(--radius-lg);
+  background: var(--color-soft-cloud);
 }
 
 .page-subtitle {
   font-family: var(--font-body);
-  font-size: var(--text-sm);
-  color: var(--parchment-dim);
+  font-size: var(--text-body-md);
+  color: var(--color-mute);
+  max-width: 720px;
 }
 
-/* Media Breakpoints (§8) */
+/* Tab Bar Strip Container */
+.tab-strip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  overflow-x: auto;
+  padding-bottom: var(--space-xs);
+  scrollbar-width: none; /* Hide scrollbar for tab strip */
+}
+.tab-strip::-webkit-scrollbar {
+  display: none;
+}
+
+/* Responsive Vertical Rhythm (§6, Mobile Hamburger Header Layout) */
 @media (max-width: 1023px) {
-  .page-container {
-    padding: var(--space-4);
-    padding-bottom: 90px;
-  }
-}
-
-@media (max-width: 639px) {
   .app-shell {
     flex-direction: column;
   }
   .main-viewport {
-    height: calc(100vh - 60px);
+    height: auto;
+    min-height: calc(100vh - 60px);
   }
   .page-container {
-    padding: var(--space-3);
-    padding-bottom: 110px; /* Clearance above mobile bottom tab bar */
+    padding: var(--space-xl) var(--space-lg);
+    gap: var(--space-8);
+    padding-bottom: 60px;
+  }
+}
+
+@media (max-width: 639px) {
+  .page-container {
+    padding: var(--space-xl) var(--space-md);
+    gap: var(--space-6);
+    padding-bottom: 60px;
   }
 }
 
 /* Print Stylesheet (§14) */
 @media print {
-  .nav-rail, .starfield, .globe-wrapper, .orbit-ring-system, .live-ticker, .shortcut-badge-trigger {
+  .nav-rail, .mobile-header-bar, .nav-drawer-backdrop, .starfield, .globe-wrapper, .orbit-ring-system, .live-ticker, .shortcut-badge-trigger {
     display: none !important;
   }
   body, .app-shell, .main-viewport {

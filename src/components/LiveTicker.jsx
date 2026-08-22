@@ -17,7 +17,7 @@ export function LiveTicker({ issSpeed, issAlt, temp, aqi, quakeCount, location }
   return (
     <div className="live-ticker">
       <div className="live-ticker__badge">
-        <span style={{ color: 'var(--nominal)' }}>●</span> LIVE TELEMETRY
+        <span style={{ color: 'var(--color-success-bright)' }}>●</span> LIVE TELEMETRY
       </div>
 
       <div className="live-ticker__track">

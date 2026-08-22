@@ -2,16 +2,15 @@
 
 .instrument-strip {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
-  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-md);
   width: 100%;
-  padding-top: var(--space-4);
-  margin-top: var(--space-2);
+  min-width: 0;
 }
 
 @media (max-width: 639px) {
   .instrument-strip {
-    grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
-    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--space-sm);
   }
 }

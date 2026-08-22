@@ -1,42 +1,46 @@
-/* Live Telemetry Ticker Component Styles (§14) */
+/* Live Telemetry Ticker — Nike Utility Bar Primitive (§2.4) */
 
 .live-ticker {
   width: 100%;
-  background: rgba(18, 24, 43, 0.95);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--hairline);
-  padding: 6px 0;
+  height: 36px;
+  background-color: var(--color-soft-cloud);
+  border-bottom: 1px solid var(--color-hairline-soft);
+  padding: 0;
   overflow: hidden;
   position: relative;
   font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--parchment-dim);
+  font-size: var(--text-utility-xs);
+  color: var(--color-mute);
   display: flex;
   align-items: center;
   user-select: none;
   z-index: 15;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-sticky-inset);
+  min-width: 0;
 }
 
 .live-ticker__badge {
-  background: var(--panel-raised);
-  border-right: 1px solid var(--hairline);
-  color: var(--brass);
+  background-color: var(--color-canvas);
+  border-right: 1px solid var(--color-hairline-soft);
+  color: var(--color-ink);
   padding: 0 16px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  height: 100%;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   white-space: nowrap;
   z-index: 5;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: var(--text-caption-sm);
+  text-transform: uppercase;
 }
 
 .live-ticker__track {
   display: flex;
   gap: 36px;
   white-space: nowrap;
-  animation: tickerScroll 35s linear infinite;
+  animation: tickerScroll 40s linear infinite;
   will-change: transform;
 }
 
@@ -47,11 +51,12 @@
 }
 
 .live-ticker__item--val {
-  color: var(--parchment);
+  color: var(--color-ink);
+  font-weight: 500;
 }
 
 .live-ticker__item--highlight {
-  color: var(--brass);
+  color: var(--color-accent-teal);
 }
 
 @keyframes tickerScroll {

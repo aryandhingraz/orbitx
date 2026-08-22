@@ -25,7 +25,7 @@ export function useWeather(rawLat, rawLon) {
     async function poll() {
       controller = new AbortController();
       try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,surface_pressure&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto`;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,surface_pressure&hourly=relative_humidity_2m,surface_pressure&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto`;
         const res = await fetch(url, { signal: controller.signal });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
@@ -39,6 +39,8 @@ export function useWeather(rawLat, rawLon) {
           windSpeed: units === 'imperial' ? kmhToMph(currentWindKmh) : currentWindKmh,
           weatherCode: json.current.weather_code,
           pressure: json.current.surface_pressure,
+          hourlyPressure: (json.hourly?.surface_pressure || []).slice(0, 24),
+          hourlyHumidity: (json.hourly?.relative_humidity_2m || []).slice(0, 24),
           daily: json.daily.time.map((time, idx) => ({
             time,
             maxTemp: units === 'imperial' ? celsiusToFahrenheit(json.daily.temperature_2m_max[idx]) : json.daily.temperature_2m_max[idx],

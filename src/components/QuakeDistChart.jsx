@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react';
+import { COLOR_TOKENS } from '../utils/colorTokens.js';
 import '../styles/components/canvasChart.css';
 
 export function QuakeDistChart({ quakes = [] }) {
@@ -14,12 +15,11 @@ export function QuakeDistChart({ quakes = [] }) {
 
     ctx.clearRect(0, 0, width, height);
 
-    // Group quakes by magnitude bucket: <2.5, 2.5-4.0, 4.0-5.5, >=5.5
     const buckets = [
-      { label: '<2.5 M', count: 0, color: '#5FBFA9' },
-      { label: '2.5-4.0 M', count: 0, color: '#C9A227' },
-      { label: '4.0-5.5 M', count: 0, color: '#E28743' },
-      { label: '≥5.5 M', count: 0, color: '#E2604F' },
+      { label: '<2.5 M', count: 0, color: COLOR_TOKENS.success.hexStr },
+      { label: '2.5-4.0 M', count: 0, color: COLOR_TOKENS.accentTeal.hexStr },
+      { label: '4.0-5.5 M', count: 0, color: COLOR_TOKENS.info.hexStr },
+      { label: '≥5.5 M', count: 0, color: COLOR_TOKENS.sale.hexStr },
     ];
 
     quakes.forEach((q) => {
@@ -39,18 +39,15 @@ export function QuakeDistChart({ quakes = [] }) {
       const barH = (b.count / maxCount) * (height - padding * 2);
       const y = height - padding - barH;
 
-      // Bar Fill
       ctx.fillStyle = b.color;
       ctx.fillRect(x, y, barW, barH);
 
-      // Value label on top
-      ctx.fillStyle = '#ECE6D6';
+      ctx.fillStyle = COLOR_TOKENS.ink.hexStr;
       ctx.font = '22px IBM Plex Mono';
       ctx.textAlign = 'center';
       ctx.fillText(`${b.count}`, x + barW / 2, y - 10);
 
-      // Bucket label below
-      ctx.fillStyle = '#A9A38F';
+      ctx.fillStyle = COLOR_TOKENS.mute.hexStr;
       ctx.font = '20px Space Grotesk';
       ctx.fillText(b.label, x + barW / 2, height - 15);
     });

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import '../styles/components/navRail.css';
 import '../styles/components/keyboardShortcutOverlay.css';
@@ -46,6 +47,37 @@ const navItems = [
     ),
   },
   {
+    path: '/alerts',
+    label: 'Alerts',
+    hasBadge: true,
+    icon: (
+      <svg className="nav-rail__icon" viewBox="0 0 24 24">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="1.75" fill="none" />
+        <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    path: '/space-weather',
+    label: 'Space Weather',
+    icon: (
+      <svg className="nav-rail__icon" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.75" fill="none" />
+        <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    path: '/earth-watch',
+    label: 'Earth Watch',
+    icon: (
+      <svg className="nav-rail__icon" viewBox="0 0 24 24">
+        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" stroke="currentColor" strokeWidth="1.75" fill="none" />
+        <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
     path: '/journal',
     label: 'Journal',
     icon: (
@@ -78,51 +110,208 @@ const navItems = [
   },
 ];
 
-export function NavRail({ onOpenShortcuts }) {
+export function NavRail({ alertCount = 0, onOpenShortcuts }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape' && mobileOpen) {
+        setMobileOpen(false);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mobileOpen]);
+
+  const handleLinkClick = () => {
+    setMobileOpen(false);
+  };
+
   return (
-    <nav className="nav-rail" aria-label="Main Navigation">
-      <div className="nav-rail__header">
-        <svg className="nav-rail__logo" viewBox="0 0 32 32" fill="none">
-          <circle cx="16" cy="16" r="14" stroke="var(--brass)" strokeWidth="2" />
-          <circle cx="16" cy="16" r="8" stroke="var(--verdigris)" strokeWidth="1.5" strokeDasharray="3 3" />
-          <circle cx="16" cy="16" r="3" fill="var(--brass)" />
-        </svg>
-        <span className="nav-rail__wordmark">OrbitX</span>
-      </div>
+    <>
+      {/* Top Mobile Bar with OrbitX Logo & Hamburger Toggle Button (Small Screens < 1024px) */}
+      <div className="mobile-header-bar">
+        <NavLink to="/" className="mobile-header-bar__brand" onClick={handleLinkClick}>
+          <svg className="nav-rail__logo" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" stroke="var(--color-ink)" strokeWidth="2" />
+            <circle cx="16" cy="16" r="8" stroke="var(--color-accent-teal)" strokeWidth="1.5" strokeDasharray="3 3" />
+            <circle cx="16" cy="16" r="3" fill="var(--color-ink)" />
+          </svg>
+          <span className="nav-rail__wordmark">OrbitX</span>
+        </NavLink>
 
-      <ul className="nav-rail__menu">
-        {navItems.map((item) => (
-          <li key={item.path} className="nav-rail__item">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+          {alertCount > 0 && (
             <NavLink
-              to={item.path}
-              className={({ isActive }) =>
-                `nav-rail__link ${isActive ? 'nav-rail__link--active' : ''}`
-              }
-              end={item.path === '/'}
+              to="/alerts"
+              className="mobile-header-bar__badge"
+              onClick={handleLinkClick}
+              title={`${alertCount} Active Telemetry Alerts`}
             >
-              {item.icon}
-              <span className="nav-rail__label">{item.label}</span>
+              🚨 {alertCount}
             </NavLink>
-          </li>
-        ))}
-      </ul>
+          )}
 
-      <div className="nav-rail__footer">
-        <div className="nav-rail__status">
-          <span className="nav-rail__pulse-dot" title="Telemetry Feed Live"></span>
-          <span>SYS.ONLINE</span>
-        </div>
-        {onOpenShortcuts && (
           <button
             type="button"
-            className="shortcut-inline-btn"
-            onClick={onOpenShortcuts}
-            title="View keyboard shortcuts"
+            className={`hamburger-btn ${mobileOpen ? 'hamburger-btn--active' : ''}`}
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle Navigation Menu"
+            title="Toggle Navigation Menu"
           >
-            ⌨️ Shortcuts <span style={{ color: 'var(--brass)', fontFamily: 'var(--font-mono)' }}>(?)</span>
+            <span className="hamburger-line"></span>
+            <span className="hamburger-line"></span>
+            <span className="hamburger-line"></span>
           </button>
-        )}
+        </div>
       </div>
-    </nav>
+
+      {/* Mobile Slide-over Drawer & Overlay (Small Screens < 1024px) */}
+      {mobileOpen && (
+        <div className="nav-drawer-backdrop" onClick={() => setMobileOpen(false)}>
+          <aside className="nav-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="nav-drawer__header">
+              <NavLink to="/" className="nav-rail__header" onClick={handleLinkClick}>
+                <svg className="nav-rail__logo" viewBox="0 0 32 32" fill="none">
+                  <circle cx="16" cy="16" r="14" stroke="var(--color-ink)" strokeWidth="2" />
+                  <circle cx="16" cy="16" r="8" stroke="var(--color-accent-teal)" strokeWidth="1.5" strokeDasharray="3 3" />
+                  <circle cx="16" cy="16" r="3" fill="var(--color-ink)" />
+                </svg>
+                <span className="nav-rail__wordmark">OrbitX</span>
+              </NavLink>
+              <button
+                type="button"
+                className="btn-icon-circular"
+                onClick={() => setMobileOpen(false)}
+                aria-label="Close Navigation Menu"
+                title="Close Navigation Menu"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="nav-drawer__status">
+              <span className="nav-rail__pulse-dot" title="Telemetry Feed Live"></span>
+              <span>SYS.ONLINE</span>
+            </div>
+
+            <ul className="nav-rail__menu" style={{ margin: 0 }}>
+              {navItems.map((item) => (
+                <li key={item.path} className="nav-rail__item">
+                  <NavLink
+                    to={item.path}
+                    className={({ isActive }) =>
+                      `nav-rail__link ${isActive ? 'nav-rail__link--active' : ''}`
+                    }
+                    end={item.path === '/'}
+                    onClick={handleLinkClick}
+                  >
+                    {item.icon}
+                    <span className="nav-rail__label">{item.label}</span>
+                    {item.hasBadge && alertCount > 0 && (
+                      <span
+                        style={{
+                          marginLeft: 'auto',
+                          backgroundColor: 'var(--color-sale)',
+                          color: '#FFFFFF',
+                          borderRadius: '10px',
+                          padding: '2px 6px',
+                          fontSize: '10px',
+                          fontFamily: 'var(--font-mono)',
+                          fontWeight: 700,
+                          lineHeight: 1,
+                        }}
+                      >
+                        {alertCount}
+                      </span>
+                    )}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+
+            <div className="nav-drawer__footer">
+              {onOpenShortcuts && (
+                <button
+                  type="button"
+                  className="shortcut-inline-btn"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    onOpenShortcuts();
+                  }}
+                  title="View keyboard shortcuts"
+                >
+                  ⌨️ Shortcuts <span style={{ color: 'var(--color-accent-teal)', fontFamily: 'var(--font-mono)' }}>(?)</span>
+                </button>
+              )}
+            </div>
+          </aside>
+        </div>
+      )}
+
+      {/* Desktop Standard Side Navigation Rail (>= 1024px) */}
+      <nav className="nav-rail" aria-label="Main Navigation">
+        <NavLink to="/" className="nav-rail__header" title="OrbitX Home (Click to return to Home page)">
+          <svg className="nav-rail__logo" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" stroke="var(--color-ink)" strokeWidth="2" />
+            <circle cx="16" cy="16" r="8" stroke="var(--color-accent-teal)" strokeWidth="1.5" strokeDasharray="3 3" />
+            <circle cx="16" cy="16" r="3" fill="var(--color-ink)" />
+          </svg>
+          <span className="nav-rail__wordmark">OrbitX</span>
+        </NavLink>
+
+        <ul className="nav-rail__menu">
+          {navItems.map((item) => (
+            <li key={item.path} className="nav-rail__item">
+              <NavLink
+                to={item.path}
+                className={({ isActive }) =>
+                  `nav-rail__link ${isActive ? 'nav-rail__link--active' : ''}`
+                }
+                end={item.path === '/'}
+              >
+                {item.icon}
+                <span className="nav-rail__label">{item.label}</span>
+                {item.hasBadge && alertCount > 0 && (
+                  <span
+                    style={{
+                      marginLeft: 'auto',
+                      backgroundColor: 'var(--color-sale)',
+                      color: '#FFFFFF',
+                      borderRadius: '10px',
+                      padding: '2px 6px',
+                      fontSize: '10px',
+                      fontFamily: 'var(--font-mono)',
+                      fontWeight: 700,
+                      lineHeight: 1,
+                    }}
+                    title={`${alertCount} Active Telemetry Alerts`}
+                  >
+                    {alertCount}
+                  </span>
+                )}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+
+        <div className="nav-rail__footer">
+          <div className="nav-rail__status">
+            <span className="nav-rail__pulse-dot" title="Telemetry Feed Live"></span>
+            <span>SYS.ONLINE</span>
+          </div>
+          {onOpenShortcuts && (
+            <button
+              type="button"
+              className="shortcut-inline-btn"
+              onClick={onOpenShortcuts}
+              title="View keyboard shortcuts"
+            >
+              ⌨️ Shortcuts <span style={{ color: 'var(--color-accent-teal)', fontFamily: 'var(--font-mono)' }}>(?)</span>
+            </button>
+          )}
+        </div>
+      </nav>
+    </>
   );
 }

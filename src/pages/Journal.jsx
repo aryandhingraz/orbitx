@@ -9,10 +9,11 @@ import { useSettings } from '../context/SettingsContext.jsx';
 import { formatTemperature, formatCoordinate } from '../utils/formatters.js';
 import { exportSnapshotAsImage } from '../utils/snapshotExport.js';
 import { exportDataAsJSON, importDataFromJSON } from '../utils/jsonBackup.js';
-import { playTelemetryClick } from '../utils/soundSynthesizer.js';
 import '../styles/components/journal.css';
 
 const JOURNAL_KEY = 'orbitx-journal';
+
+const TAG_OPTIONS = ['Climate Record', 'Seismic Alert', 'Solar Event', 'ISS Sighting', 'Animal Behavior Note'];
 
 export function Journal() {
   const { units } = useSettings();
@@ -25,6 +26,7 @@ export function Journal() {
 
   const [noteInput, setNoteInput] = useState('');
   const [selectedTag, setSelectedTag] = useState('Climate Record');
+  const [activeFilter, setActiveFilter] = useState('All');
 
   const [entries, setEntries] = useState(() => {
     try {
@@ -44,12 +46,11 @@ export function Journal() {
   }, [entries]);
 
   function handlePinCurrentSnapshot() {
-    playTelemetryClick(true);
     const newEntry = {
       id: Date.now(),
       timestamp: Date.now(),
       tag: selectedTag,
-      note: noteInput.trim() || 'Routine planetary observation log',
+      note: noteInput.trim() || 'Routine observation note',
       location: geo.data?.cityLabel || 'Local Observatory',
       coordinates: formatCoordinate(geo.data?.latitude, geo.data?.longitude),
       temp: formatTemperature(weather.data?.temperature, units),
@@ -65,7 +66,7 @@ export function Journal() {
   }
 
   function handleClearJournal() {
-    if (window.confirm('Are you sure you want to clear all telemetry journal logs?')) {
+    if (window.confirm('Are you sure you want to clear all journal entries?')) {
       setEntries([]);
     }
   }
@@ -91,93 +92,136 @@ export function Journal() {
     });
   }
 
+  const filteredEntries = entries.filter((e) => {
+    if (activeFilter === 'All') return true;
+    return e.tag === activeFilter;
+  });
+
   return (
     <div className="page-container">
       <header className="page-header">
         <h1 className="page-title">
-          Telemetry Ledger
-          <span className="page-title__tag">PERSISTED</span>
+          Personal Telemetry Journal
+          <span className="page-title__tag">PERSISTED LEDGER</span>
         </h1>
         <p className="page-subtitle">
-          Pin timestamped telemetry snapshots with notes, filter logs, & export image/JSON records
+          Save a note about today's weather, air quality, or anything notable you want to remember — like a diary entry with real data attached.
         </p>
       </header>
 
-      {/* Snapshot Pinning Card with Custom Notes (§4.4) */}
-      <div style={{ background: 'var(--panel)', border: '1px solid var(--hairline)', padding: '1.25rem', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '15px', color: 'var(--brass)', textTransform: 'uppercase' }}>
-          📌 Pin New Telemetry Observation
-        </h2>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <select
-            value={selectedTag}
-            onChange={(e) => setSelectedTag(e.target.value)}
-            style={{ background: 'var(--panel-raised)', border: '1px solid var(--hairline)', color: 'var(--brass)', padding: '8px 12px', borderRadius: '6px', fontFamily: 'var(--font-mono)', fontSize: '13px' }}
-          >
-            <option value="Climate Record">Climate Record</option>
-            <option value="Seismic Alert">Seismic Alert</option>
-            <option value="Solar Event">Solar Event</option>
-            <option value="Orbital Pass">Orbital Pass</option>
-          </select>
-          <input
-            type="text"
-            placeholder="Add observer notes (e.g. Unusual pressure drop, bright ISS overhead pass)..."
-            value={noteInput}
-            onChange={(e) => setNoteInput(e.target.value)}
-            style={{ flex: 1, minWidth: '240px', background: 'var(--panel-raised)', border: '1px solid var(--hairline)', padding: '8px 12px', borderRadius: '6px', color: 'var(--parchment)', fontSize: '14px' }}
-          />
-          <button type="button" className="journal-btn" onClick={handlePinCurrentSnapshot}>
-            PIN TELEMETRY SNAPSHOT
-          </button>
+      {/* Snapshot Pinning Card with Custom Notes (§5.2) */}
+      <section className="data-widget-card" style={{ gap: 'var(--space-md)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--space-xs)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-xs)' }}>
+            <span className="swatch-dot"></span>
+            <span className="badge-promo">CREATE NEW JOURNAL ENTRY</span>
+          </div>
+          {selectedTag === 'Animal Behavior Note' && (
+            <span style={{ fontSize: 'var(--text-caption-sm)', color: 'var(--color-info)', fontStyle: 'italic' }}>
+              ℹ️ Personal log only — no scientific link between animal behavior and earthquake prediction has been established (USGS).
+            </span>
+          )}
         </div>
-      </div>
 
-      {/* Action Controls Bar */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+          <div style={{ display: 'flex', gap: 'var(--space-md)', flexWrap: 'wrap', alignItems: 'center' }}>
+            <select
+              value={selectedTag}
+              onChange={(e) => setSelectedTag(e.target.value)}
+              style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-hairline)', color: 'var(--color-ink)', padding: '10px 16px', borderRadius: 'var(--radius-lg)', fontFamily: 'var(--font-body)', fontSize: 'var(--text-caption-md)' }}
+            >
+              {TAG_OPTIONS.map((tag) => (
+                <option key={tag} value={tag}>{tag}</option>
+              ))}
+            </select>
+
+            <input
+              type="text"
+              className="search-pill"
+              placeholder="Add your note (e.g. Unusual pressure drop, clear night sky, bright ISS pass)..."
+              value={noteInput}
+              onChange={(e) => setNoteInput(e.target.value)}
+              style={{ flex: 1, minWidth: '240px' }}
+            />
+
+            <button type="button" className="btn-primary" onClick={handlePinCurrentSnapshot}>
+              Save Today's Entry
+            </button>
+          </div>
+
+          <span style={{ fontSize: 'var(--text-caption-sm)', color: 'var(--color-mute)' }}>
+            💡 Tag your entry so you can filter and find it later in your timeline.
+          </span>
+        </div>
+      </section>
+
+      {/* Filter Chips & Action Controls Bar */}
       <div className="journal-actions">
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button type="button" className="journal-btn" onClick={handleJSONExport} disabled={entries.length === 0}>
-            💾 EXPORT JSON BACKUP
+        <div className="tab-strip">
+          <span style={{ fontSize: 'var(--text-caption-sm)', color: 'var(--color-mute)', marginRight: '4px' }}>FILTER:</span>
+          {['All', ...TAG_OPTIONS].map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              className={`filter-chip ${activeFilter === tag ? 'filter-chip--active' : ''}`}
+              onClick={() => setActiveFilter(tag)}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', gap: 'var(--space-xs)', flexWrap: 'wrap' }}>
+          <button type="button" className="btn-secondary" onClick={handleJSONExport} disabled={entries.length === 0} style={{ height: '40px', padding: '0 16px', fontSize: 'var(--text-caption-md)' }}>
+            💾 JSON EXPORT
           </button>
-          <label className="journal-btn" style={{ cursor: 'pointer' }}>
-            📂 RESTORE JSON
+          <label className="btn-secondary" style={{ height: '40px', padding: '0 16px', fontSize: 'var(--text-caption-md)', cursor: 'pointer' }}>
+            📂 RESTORE
             <input type="file" accept=".json" onChange={handleJSONImport} style={{ display: 'none' }} />
           </label>
+          {entries.length > 0 && (
+            <button type="button" className="btn-secondary" onClick={handleClearJournal} style={{ height: '40px', padding: '0 16px', fontSize: 'var(--text-caption-md)', color: 'var(--color-sale)', borderColor: 'var(--color-sale)' }}>
+              CLEAR ALL
+            </button>
+          )}
         </div>
-
-        {entries.length > 0 && (
-          <button type="button" className="journal-btn journal-btn--danger" onClick={handleClearJournal}>
-            🗑️ CLEAR JOURNAL
-          </button>
-        )}
       </div>
 
-      {/* Timeline List */}
-      {entries.length === 0 ? (
-        <div style={{ background: 'var(--panel)', border: '1px dashed var(--hairline)', padding: '3rem', borderRadius: '10px', textAlign: 'center', color: 'var(--parchment-dim)' }}>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--brass)' }}>No Telemetry Logged Yet</p>
-          <p style={{ fontSize: '14px', marginTop: '6px' }}>Pin an observation above to save telemetry snapshots into persistent localStorage.</p>
-        </div>
+      {/* Timeline List or Designed Empty State */}
+      {filteredEntries.length === 0 ? (
+        <section className="data-widget-card" style={{ padding: 'var(--space-section) var(--space-xl)', textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '50%', border: '1px solid var(--color-hairline)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'var(--color-mute)', marginBottom: 'var(--space-md)' }}>
+            📖
+          </div>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-heading-md)', color: 'var(--color-ink)', textTransform: 'uppercase' }}>
+            No Journal Entries Logged
+          </h2>
+          <p style={{ color: 'var(--color-mute)', maxWidth: '460px', marginTop: 'var(--space-xs)' }}>
+            {activeFilter !== 'All'
+              ? `No entry matches the "${activeFilter}" filter category.`
+              : 'Save your first entry above to create a persistent diary record with real data attached.'}
+          </p>
+        </section>
       ) : (
         <div className="timeline-list">
-          {entries.map((entry) => (
-            <div key={entry.id} className="timeline-card">
+          {filteredEntries.map((entry) => (
+            <article key={entry.id} className="timeline-card">
               <div className="timeline-card__header">
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <h2 className="timeline-card__title">Snapshot #{entry.id.toString().slice(-4)}</h2>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', background: 'var(--panel-raised)', color: 'var(--verdigris)', border: '1px solid var(--hairline)', padding: '2px 6px', borderRadius: '4px' }}>
-                      {entry.tag || 'Observation'}
-                    </span>
+                    <h2 className="timeline-card__title">Entry #{entry.id.toString().slice(-4)}</h2>
+                    <span className="badge-promo">{entry.tag || 'Observation'}</span>
                   </div>
                   <span className="timeline-card__timestamp">
                     {new Date(entry.timestamp).toLocaleString()} • {entry.location} ({entry.coordinates})
                   </span>
                 </div>
+
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button
                     type="button"
-                    className="journal-btn"
-                    style={{ padding: '4px 10px', fontSize: '12px' }}
+                    className="btn-secondary"
+                    style={{ height: '36px', padding: '0 12px', fontSize: 'var(--text-caption-sm)' }}
                     onClick={() => exportSnapshotAsImage(entry)}
                     title="Export snapshot as PNG image"
                   >
@@ -185,7 +229,8 @@ export function Journal() {
                   </button>
                   <button
                     type="button"
-                    style={{ color: 'var(--signal)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}
+                    className="btn-icon-circular"
+                    style={{ width: '36px', height: '36px', fontSize: '12px', color: 'var(--color-sale)' }}
                     onClick={() => handleDeleteEntry(entry.id)}
                     title="Delete log"
                   >
@@ -194,37 +239,37 @@ export function Journal() {
                 </div>
               </div>
 
-              <p style={{ fontStyle: 'italic', fontSize: '14px', color: 'var(--parchment)' }}>
+              <p style={{ fontStyle: 'italic', fontSize: 'var(--text-body-md)', color: 'var(--color-ink)' }}>
                 "{entry.note}"
               </p>
 
               <div className="timeline-card__data-grid">
                 <div className="timeline-card__data-item">
-                  <span style={{ color: 'var(--parchment-dim)' }}>Temp: </span>
-                  <span style={{ color: 'var(--brass)' }}>{entry.temp}</span>
+                  <span style={{ color: 'var(--color-mute)' }}>Temp: </span>
+                  <span style={{ fontWeight: 600 }}>{entry.temp}</span>
                 </div>
                 <div className="timeline-card__data-item">
-                  <span style={{ color: 'var(--parchment-dim)' }}>Air Quality: </span>
-                  <span style={{ color: 'var(--verdigris)' }}>{entry.aqi} AQI</span>
+                  <span style={{ color: 'var(--color-mute)' }}>Air Quality: </span>
+                  <span style={{ color: 'var(--color-success-bright)', fontWeight: 600 }}>{entry.aqi} AQI</span>
                 </div>
                 <div className="timeline-card__data-item">
-                  <span style={{ color: 'var(--parchment-dim)' }}>Earthquakes: </span>
+                  <span style={{ color: 'var(--color-mute)' }}>Earthquakes: </span>
                   <span>{entry.quakes} events</span>
                 </div>
                 <div className="timeline-card__data-item">
-                  <span style={{ color: 'var(--parchment-dim)' }}>ISS Altitude: </span>
+                  <span style={{ color: 'var(--color-mute)' }}>ISS Altitude: </span>
                   <span>{entry.issAltitude} km</span>
                 </div>
                 <div className="timeline-card__data-item">
-                  <span style={{ color: 'var(--parchment-dim)' }}>ISS Velocity: </span>
+                  <span style={{ color: 'var(--color-mute)' }}>ISS Velocity: </span>
                   <span>{entry.issSpeed} km/h</span>
                 </div>
                 <div className="timeline-card__data-item">
-                  <span style={{ color: 'var(--parchment-dim)' }}>Moon Phase: </span>
+                  <span style={{ color: 'var(--color-mute)' }}>Moon Phase: </span>
                   <span>{entry.moonPhase}</span>
                 </div>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       )}

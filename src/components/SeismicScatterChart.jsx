@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { useSettings } from '../context/SettingsContext.jsx';
 import { playTelemetryPing } from '../utils/soundSynthesizer.js';
+import { COLOR_TOKENS } from '../utils/colorTokens.js';
 import '../styles/components/canvasChart.css';
 
 export function SeismicScatterChart({ quakes = [] }) {
@@ -23,8 +24,7 @@ export function SeismicScatterChart({ quakes = [] }) {
     const chartW = width - padding * 2;
     const chartH = height - padding * 2;
 
-    // Draw Axes
-    ctx.strokeStyle = 'rgba(201, 162, 39, 0.2)';
+    ctx.strokeStyle = 'rgba(202, 202, 203, 0.2)';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(padding, padding);
@@ -32,8 +32,7 @@ export function SeismicScatterChart({ quakes = [] }) {
     ctx.lineTo(width - padding, height - padding);
     ctx.stroke();
 
-    // Axis Labels
-    ctx.fillStyle = '#A9A38F';
+    ctx.fillStyle = COLOR_TOKENS.mute.hexStr;
     ctx.font = '20px IBM Plex Mono';
     ctx.textAlign = 'center';
     ctx.fillText('Magnitude (M 0 .. 8)', width / 2, height - 15);
@@ -45,13 +44,12 @@ export function SeismicScatterChart({ quakes = [] }) {
     ctx.restore();
 
     if (!quakes || quakes.length === 0) {
-      ctx.fillStyle = '#A9A38F';
+      ctx.fillStyle = COLOR_TOKENS.mute.hexStr;
       ctx.font = '22px IBM Plex Mono';
       ctx.fillText('Awaiting seismic telemetry...', width / 2, height / 2);
       return;
     }
 
-    // Scatter Dots
     quakes.forEach((q) => {
       const mag = Math.min(8, Math.max(0, q.mag || 1));
       const depth = Math.min(300, Math.max(0, q.coordinates?.[2] || 10));
@@ -61,14 +59,13 @@ export function SeismicScatterChart({ quakes = [] }) {
       const isSelected = activeQuake?.id === q.id;
 
       const radius = isSelected ? Math.max(8, mag * 3.5) : Math.max(4, mag * 2.5);
-      const color = mag >= 5.0 ? '#E2604F' : mag >= 3.5 ? '#C9A227' : '#5FBFA9';
+      const color = mag >= 5.0 ? COLOR_TOKENS.sale.hexStr : mag >= 3.5 ? COLOR_TOKENS.info.hexStr : COLOR_TOKENS.success.hexStr;
 
       ctx.fillStyle = isSelected ? '#FFFFFF' : color;
       ctx.beginPath();
       ctx.arc(x, y, radius, 0, Math.PI * 2);
       ctx.fill();
 
-      // Pulsing outer ring for active quake
       ctx.strokeStyle = color;
       ctx.lineWidth = isSelected ? 3 : 1;
       ctx.beginPath();
@@ -76,7 +73,6 @@ export function SeismicScatterChart({ quakes = [] }) {
       ctx.stroke();
     });
 
-    // Tooltip Card for Active Quake
     if (activeQuake) {
       const mag = Math.min(8, Math.max(0, activeQuake.mag || 1));
       const depth = Math.min(300, Math.max(0, activeQuake.coordinates?.[2] || 10));
@@ -88,20 +84,20 @@ export function SeismicScatterChart({ quakes = [] }) {
       if (boxX + boxW > width - 20) boxX = x - boxW - 20;
       const boxY = padding + 10;
 
-      ctx.fillStyle = 'rgba(20, 26, 46, 0.95)';
-      ctx.strokeStyle = '#E2604F';
+      ctx.fillStyle = 'rgba(17, 17, 17, 0.95)';
+      ctx.strokeStyle = COLOR_TOKENS.sale.hexStr;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.roundRect(boxX, boxY, boxW, boxH, 8);
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = '#E2604F';
+      ctx.fillStyle = COLOR_TOKENS.sale.hexStr;
       ctx.font = '700 20px Space Grotesk';
       ctx.textAlign = 'left';
       ctx.fillText(`Magnitude M ${activeQuake.mag.toFixed(1)}`, boxX + 16, boxY + 30);
 
-      ctx.fillStyle = '#ECE6D6';
+      ctx.fillStyle = '#FFFFFF';
       ctx.font = '18px IBM Plex Mono';
       ctx.fillText(`Location: ${activeQuake.place || 'Unknown'}`, boxX + 16, boxY + 56);
       ctx.fillText(`Depth: ${depth.toFixed(1)} km`, boxX + 16, boxY + 78);
@@ -124,7 +120,6 @@ export function SeismicScatterChart({ quakes = [] }) {
     const chartW = canvas.width - padding * 2;
     const chartH = canvas.height - padding * 2;
 
-    // Find nearest quake dot
     let closest = null;
     let minDist = Infinity;
 
@@ -156,7 +151,7 @@ export function SeismicScatterChart({ quakes = [] }) {
           <span className="chart-card__subtitle">👆 Move cursor / touch over dots to inspect epicenter details</span>
         </div>
         {activeQuake && (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--signal)' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--color-sale)' }}>
             M {activeQuake.mag} • {activeQuake.place}
           </span>
         )}

@@ -1,50 +1,47 @@
-/* OrbitMarker Component Styles (§2.5, §5) */
+/* OrbitMarker Component Styles — Nike Swatch Dot Primitive (§2.4) */
 
 .orbit-marker-btn {
   position: absolute;
   width: 24px;
   height: 24px;
-  border-radius: 50%;
-  background: var(--panel-raised);
-  border: 1.5px solid var(--brass);
-  color: var(--brass);
+  border-radius: var(--radius-full);
+  background-color: var(--color-canvas);
+  border: 2px solid var(--color-accent-teal);
+  color: var(--color-ink);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   pointer-events: auto;
   transform: translate(-50%, -50%);
-  transition: all 200ms ease;
-  box-shadow: 0 0 10px var(--brass-glow);
+  transition: transform 200ms ease, background-color 200ms ease;
+  box-shadow: none;
   z-index: 5;
 }
 
 .orbit-marker-btn:hover {
-  transform: translate(-50%, -50%) scale(1.25);
-  background: var(--brass);
-  color: var(--void);
-  box-shadow: 0 0 18px var(--brass-glow);
+  transform: translate(-50%, -50%) scale(1.2);
+  border-color: var(--color-ink);
+  background-color: var(--color-soft-cloud);
 }
 
 .orbit-marker-btn--active {
-  background: var(--brass);
-  color: var(--void);
-  border-color: var(--parchment);
-  box-shadow: 0 0 24px var(--brass-glow);
-  transform: translate(-50%, -50%) scale(1.3);
+  background-color: var(--color-ink);
+  color: var(--color-on-primary);
+  border-color: var(--color-ink);
+  transform: translate(-50%, -50%) scale(1.25);
 }
 
 .orbit-marker-btn--stale {
-  border-color: var(--signal);
-  color: var(--signal);
-  box-shadow: 0 0 12px var(--signal-glow);
+  border-color: var(--color-sale);
+  color: var(--color-sale);
 }
 
 .orbit-marker-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background-color: currentColor;
 }
 
 .orbit-marker-label {
@@ -53,13 +50,12 @@
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--parchment);
-  background: rgba(20, 26, 46, 0.9);
-  border: 1px solid var(--hairline);
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
+  font-size: var(--text-utility-xs);
+  color: var(--color-ink);
+  background-color: var(--color-soft-cloud);
+  border: 1px solid var(--color-hairline);
+  padding: 2px 8px;
+  border-radius: var(--radius-lg);
   white-space: nowrap;
   pointer-events: none;
-  opacity: 0.85;
 }

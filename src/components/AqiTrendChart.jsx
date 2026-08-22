@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { useSettings } from '../context/SettingsContext.jsx';
 import { playTelemetryPing } from '../utils/soundSynthesizer.js';
+import { COLOR_TOKENS } from '../utils/colorTokens.js';
 import '../styles/components/canvasChart.css';
 
 export function AqiTrendChart({ hourlyAqi = [] }) {
@@ -31,17 +32,17 @@ export function AqiTrendChart({ hourlyAqi = [] }) {
     const getX = (idx) => padding + (chartW / (data.length - 1)) * idx;
 
     // Good band (0-50)
-    ctx.fillStyle = 'rgba(95, 191, 169, 0.08)';
+    ctx.fillStyle = 'rgba(30, 170, 82, 0.08)';
     ctx.fillRect(padding, getY(50), chartW, chartH - (getY(50) - padding));
 
     // Moderate band (51-100)
-    ctx.fillStyle = 'rgba(201, 162, 39, 0.08)';
+    ctx.fillStyle = 'rgba(17, 81, 255, 0.08)';
     ctx.fillRect(padding, getY(100), chartW, getY(50) - getY(100));
 
     // Area Curve
     const grad = ctx.createLinearGradient(0, padding, 0, height - padding);
-    grad.addColorStop(0, 'rgba(95, 191, 169, 0.4)');
-    grad.addColorStop(1, 'rgba(95, 191, 169, 0.0)');
+    grad.addColorStop(0, 'rgba(10, 114, 129, 0.35)');
+    grad.addColorStop(1, 'rgba(10, 114, 129, 0.0)');
 
     ctx.beginPath();
     data.forEach((val, i) => {
@@ -56,9 +57,9 @@ export function AqiTrendChart({ hourlyAqi = [] }) {
     ctx.fillStyle = grad;
     ctx.fill();
 
-    // Line Curve
+    // Line Curve (Teal Accent)
     ctx.beginPath();
-    ctx.strokeStyle = '#5FBFA9';
+    ctx.strokeStyle = COLOR_TOKENS.accentTeal.hexStr;
     ctx.lineWidth = 4;
     data.forEach((val, i) => {
       const x = getX(i);
@@ -72,7 +73,7 @@ export function AqiTrendChart({ hourlyAqi = [] }) {
     data.forEach((_, i) => {
       if (i % 4 === 0) {
         const x = getX(i);
-        ctx.fillStyle = '#A9A38F';
+        ctx.fillStyle = COLOR_TOKENS.mute.hexStr;
         ctx.font = '20px IBM Plex Mono';
         ctx.textAlign = 'center';
         ctx.fillText(`${i}:00`, x, height - 15);
@@ -85,8 +86,7 @@ export function AqiTrendChart({ hourlyAqi = [] }) {
       const x = getX(activeIndex);
       const y = getY(aqiVal);
 
-      // Vertical Scrubber Line
-      ctx.strokeStyle = 'rgba(95, 191, 169, 0.7)';
+      ctx.strokeStyle = 'rgba(10, 114, 129, 0.7)';
       ctx.lineWidth = 2;
       ctx.setLineDash([4, 4]);
       ctx.beginPath();
@@ -95,25 +95,23 @@ export function AqiTrendChart({ hourlyAqi = [] }) {
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Point Dot
       ctx.fillStyle = '#FFFFFF';
       ctx.beginPath();
       ctx.arc(x, y, 9, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = '#5FBFA9';
+      ctx.fillStyle = COLOR_TOKENS.accentTeal.hexStr;
       ctx.beginPath();
       ctx.arc(x, y, 5, 0, Math.PI * 2);
       ctx.fill();
 
-      // Tooltip Card
       const boxW = 240;
       const boxH = 80;
       let boxX = x + 20;
       if (boxX + boxW > width - 20) boxX = x - boxW - 20;
       const boxY = padding + 10;
 
-      ctx.fillStyle = 'rgba(20, 26, 46, 0.95)';
-      ctx.strokeStyle = '#5FBFA9';
+      ctx.fillStyle = 'rgba(17, 17, 17, 0.95)';
+      ctx.strokeStyle = COLOR_TOKENS.accentTeal.hexStr;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.roundRect(boxX, boxY, boxW, boxH, 8);
@@ -121,15 +119,21 @@ export function AqiTrendChart({ hourlyAqi = [] }) {
       ctx.stroke();
 
       let categoryStr = 'Good';
-      if (aqiVal > 50 && aqiVal <= 100) categoryStr = 'Moderate';
-      else if (aqiVal > 100) categoryStr = 'Unhealthy';
+      let catColor = COLOR_TOKENS.success.hexStr;
+      if (aqiVal > 50 && aqiVal <= 100) {
+        categoryStr = 'Moderate';
+        catColor = COLOR_TOKENS.info.hexStr;
+      } else if (aqiVal > 100) {
+        categoryStr = 'Unhealthy';
+        catColor = COLOR_TOKENS.sale.hexStr;
+      }
 
-      ctx.fillStyle = '#5FBFA9';
+      ctx.fillStyle = COLOR_TOKENS.accentTeal.hexStr;
       ctx.font = '700 20px Space Grotesk';
       ctx.textAlign = 'left';
       ctx.fillText(`Time: ${activeIndex}:00`, boxX + 16, boxY + 30);
 
-      ctx.fillStyle = '#ECE6D6';
+      ctx.fillStyle = catColor;
       ctx.font = '20px IBM Plex Mono';
       ctx.fillText(`AQI: ${aqiVal} (${categoryStr})`, boxX + 16, boxY + 60);
     }
@@ -162,7 +166,7 @@ export function AqiTrendChart({ hourlyAqi = [] }) {
           <span className="chart-card__subtitle">👆 Drag cursor / touch across graph to track AQI</span>
         </div>
         {activeIndex !== null && (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--verdigris)' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--color-accent-teal)' }}>
             {activeIndex}:00 → {data[activeIndex]} AQI
           </span>
         )}

@@ -1,10 +1,9 @@
-/* DataPanel Component Styles (§2.5, §5) */
+/* DataPanel Component Styles — Nike Spec (§2.4) */
 
 .data-panel-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(11, 14, 26, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.7);
   z-index: 100;
   display: flex;
   justify-content: flex-end;
@@ -13,18 +12,19 @@
 
 .data-panel-drawer {
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   height: 100%;
-  background: var(--panel);
-  border-left: 1px solid var(--hairline);
-  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.6);
+  background-color: var(--color-canvas);
+  border-left: 1px solid var(--color-hairline);
+  box-shadow: none;
   display: flex;
   flex-direction: column;
-  padding: var(--space-6);
-  gap: var(--space-6);
+  padding: var(--space-xl);
+  gap: var(--space-xl);
   position: relative;
   animation: panelSlideIn 280ms cubic-bezier(0.16, 1, 0.3, 1);
   overflow-y: auto;
+  min-width: 0;
 }
 
 @keyframes backdropFadeIn {
@@ -41,42 +41,43 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--hairline);
-  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-hairline);
+  padding-bottom: var(--space-md);
 }
 
 .data-panel__title {
   font-family: var(--font-display);
-  font-size: var(--text-lg);
+  font-size: var(--text-heading-md);
   font-weight: 700;
-  color: var(--brass);
+  color: var(--color-ink);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .data-panel__close-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid var(--hairline);
-  color: var(--parchment-dim);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-hairline);
+  background-color: var(--color-soft-cloud);
+  color: var(--color-ink);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 150ms ease;
+  transition: background-color 150ms ease;
 }
 
 .data-panel__close-btn:hover {
-  color: var(--signal);
-  border-color: var(--signal);
-  background: var(--panel-raised);
+  background-color: var(--color-soft-cloud-subtle);
+  border-color: var(--color-ash);
 }
 
 .data-panel__body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-md);
+  min-width: 0;
 }
 
 @media (max-width: 639px) {

@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react';
+import { RADAR_CITY_COLORS, COLOR_TOKENS } from '../utils/colorTokens.js';
 import '../styles/components/canvasChart.css';
 
 export function RadarChart({ citiesData = [] }) {
@@ -20,12 +21,10 @@ export function RadarChart({ citiesData = [] }) {
 
     const axes = ['Temp', 'Air Quality', 'Wind Speed', 'Pressure', 'Humidity'];
     const totalAxes = axes.length;
-    const colors = ['#C9A227', '#5FBFA9', '#E28743', '#9B51E0'];
 
-    // Draw Radar Web Concentric Rings
     for (let r = 1; r <= 4; r++) {
       const curR = (radius / 4) * r;
-      ctx.strokeStyle = 'rgba(201, 162, 39, 0.12)';
+      ctx.strokeStyle = 'rgba(202, 202, 203, 0.15)';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       for (let i = 0; i < totalAxes; i++) {
@@ -39,13 +38,12 @@ export function RadarChart({ citiesData = [] }) {
       ctx.stroke();
     }
 
-    // Draw Axes Lines & Labels
     axes.forEach((label, i) => {
       const angle = (i / totalAxes) * Math.PI * 2 - Math.PI / 2;
       const x = centerX + radius * Math.cos(angle);
       const y = centerY + radius * Math.sin(angle);
 
-      ctx.strokeStyle = 'rgba(201, 162, 39, 0.25)';
+      ctx.strokeStyle = 'rgba(202, 202, 203, 0.25)';
       ctx.beginPath();
       ctx.moveTo(centerX, centerY);
       ctx.lineTo(x, y);
@@ -53,16 +51,15 @@ export function RadarChart({ citiesData = [] }) {
 
       const labelX = centerX + (radius + 24) * Math.cos(angle);
       const labelY = centerY + (radius + 24) * Math.sin(angle);
-      ctx.fillStyle = '#ECE6D6';
-      ctx.font = '18px Space Grotesk';
+      ctx.fillStyle = COLOR_TOKENS.mute.hexStr;
+      ctx.font = '18px Inter';
       ctx.textAlign = 'center';
       ctx.fillText(label, labelX, labelY);
     });
 
-    // Draw Radar Polygons for Each Compared City
     citiesData.forEach((city, cityIdx) => {
-      const color = colors[cityIdx % colors.length];
-      const values = city.normalizedValues || [0.6, 0.4, 0.5, 0.7, 0.5];
+      const color = RADAR_CITY_COLORS[cityIdx % RADAR_CITY_COLORS.length];
+      const values = city.normalizedValues || [0.5, 0.5, 0.5, 0.5, 0.5];
 
       ctx.beginPath();
       values.forEach((val, i) => {
@@ -88,7 +85,7 @@ export function RadarChart({ citiesData = [] }) {
     <div className="chart-card">
       <div className="chart-card__header">
         <h2 className="chart-card__title">Multi-Metric Comparative Radar</h2>
-        <span className="chart-card__subtitle">Normalized Telemetry Polygon</span>
+        <span className="chart-card__subtitle">Real Normalized Telemetry Polygon</span>
       </div>
       <div className="chart-canvas-container" style={{ height: '260px' }}>
         <canvas ref={canvasRef} className="chart-canvas" />

@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { getMoonPhase } from '../utils/moonPhase.js';
+import { COLOR_TOKENS } from '../utils/colorTokens.js';
 import '../styles/components/canvasChart.css';
 
 export function MoonPhaseStripChart() {
@@ -30,17 +31,17 @@ export function MoonPhaseStripChart() {
       const radius = 28;
 
       // Dark Moon Disc Base
-      ctx.fillStyle = '#141A2E';
-      ctx.strokeStyle = 'rgba(201, 162, 39, 0.4)';
+      ctx.fillStyle = COLOR_TOKENS.softCloud.hexStr;
+      ctx.strokeStyle = COLOR_TOKENS.hairline.hexStr;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
 
-      // Illuminated Crescent / Gibbous Shape
+      // Illuminated Crescent / Gibbous Shape (Accent Teal)
       const illum = item.phase.illuminationPercent / 100;
-      ctx.fillStyle = '#C9A227';
+      ctx.fillStyle = COLOR_TOKENS.accentTeal.hexStr;
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, -Math.PI / 2, Math.PI / 2, illum > 0.5);
       ctx.ellipse(centerX, centerY, Math.abs(radius * (1 - 2 * illum)), radius, 0, Math.PI / 2, -Math.PI / 2, illum < 0.5);
@@ -48,12 +49,12 @@ export function MoonPhaseStripChart() {
 
       // Date & Phase Label
       const dayStr = i === 0 ? 'Today' : item.date.toLocaleDateString([], { weekday: 'short' });
-      ctx.fillStyle = '#ECE6D6';
+      ctx.fillStyle = COLOR_TOKENS.ink.hexStr;
       ctx.font = '20px Space Grotesk';
       ctx.textAlign = 'center';
       ctx.fillText(dayStr, centerX, height - 35);
 
-      ctx.fillStyle = '#A9A38F';
+      ctx.fillStyle = COLOR_TOKENS.mute.hexStr;
       ctx.font = '16px IBM Plex Mono';
       ctx.fillText(`${item.phase.illuminationPercent}%`, centerX, height - 12);
     });

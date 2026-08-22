@@ -1,44 +1,23 @@
-/* Keyboard Shortcut Overlay Styles (§14) */
-
-.shortcut-inline-btn {
-  background: var(--panel-raised);
-  border: 1px solid var(--hairline);
-  color: var(--brass);
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  cursor: pointer;
-  transition: all 150ms ease;
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.shortcut-inline-btn:hover {
-  border-color: var(--brass);
-  background: var(--panel);
-  box-shadow: 0 0 10px var(--brass-glow);
-}
+/* Keyboard Shortcut Overlay Styles — Nike Specs (§2.4) */
 
 .shortcut-grid {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 12px 24px;
+  gap: var(--space-xs) var(--space-md);
   align-items: center;
   font-family: var(--font-mono);
-  font-size: 13px;
-  margin-top: 12px;
+  font-size: var(--text-caption-sm);
+  margin-top: var(--space-xs);
 }
 
 .shortcut-key {
-  background: var(--panel-raised);
-  border: 1px solid var(--brass);
-  color: var(--brass);
-  padding: 4px 10px;
-  border-radius: 4px;
+  background-color: var(--color-canvas);
+  border: 1px solid var(--color-hairline);
+  color: var(--color-ink);
+  padding: 3px 8px;
+  border-radius: var(--radius-lg);
   font-weight: 600;
   text-align: center;
-  min-width: 32px;
+  min-width: 36px;
+  white-space: nowrap;
 }

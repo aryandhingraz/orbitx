@@ -1,79 +1,82 @@
-import { useWeather } from '../hooks/useWeather.js';
-import { useAirQuality } from '../hooks/useAirQuality.js';
 import { useSunAndMoon } from '../hooks/useSunAndMoon.js';
 import { useSettings } from '../context/SettingsContext.jsx';
 import { formatTemperature, formatWindSpeed, formatCoordinate } from '../utils/formatters.js';
 import { InstrumentGauge } from './InstrumentGauge.jsx';
 import { SkeletonPulse } from './SkeletonPulse.jsx';
 
-export function CompareCityCard({ city, onRemove }) {
+export function CompareCityCard({ city, weatherData, aqiData, onRemove }) {
   const { units } = useSettings();
-  const weather = useWeather(city.latitude, city.longitude);
-  const airQuality = useAirQuality(city.latitude, city.longitude);
   const sunMoon = useSunAndMoon(city.latitude, city.longitude);
 
+  const weather = weatherData || {};
+  const airQuality = aqiData || {};
+
   return (
-    <div className="compare-card">
+    <div className="compare-card data-widget-card" style={{ gap: 'var(--space-md)' }}>
       <div className="compare-card__header">
-        <div>
-          <h2 className="compare-card__name">{city.name}</h2>
-          <span className="compare-card__country">{city.country} • {formatCoordinate(city.latitude, city.longitude)}</span>
+        <div style={{ minWidth: 0 }}>
+          <h2 className="compare-card__name text-truncate" title={city.name}>{city.name}</h2>
+          <span className="compare-card__country text-truncate" title={`${city.country} • ${formatCoordinate(city.latitude, city.longitude)}`}>
+            {city.country} • {formatCoordinate(city.latitude, city.longitude)}
+          </span>
         </div>
         <button
           type="button"
-          className="compare-card__remove"
+          className="btn-icon-circular"
           onClick={onRemove}
           aria-label={`Remove ${city.name} from comparison`}
+          title={`Remove ${city.name}`}
+          style={{ width: '32px', height: '32px', fontSize: '12px' }}
         >
           ✕
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-        {weather.isLoading ? (
-          <SkeletonPulse width="100%" height="68px" />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-sm)', minWidth: 0 }}>
+        {!weather.temperature && weather.temperature !== 0 ? (
+          <SkeletonPulse width="100%" height="84px" />
         ) : (
           <InstrumentGauge
             label="Temperature"
-            value={formatTemperature(weather.data?.temperature, units)}
+            value={formatTemperature(weather.temperature, units)}
             unit=""
             status="nominal"
           />
         )}
 
-        {airQuality.isLoading ? (
-          <SkeletonPulse width="100%" height="68px" />
+        {!airQuality.aqi && airQuality.aqi !== 0 ? (
+          <SkeletonPulse width="100%" height="84px" />
         ) : (
           <InstrumentGauge
             label="Air Quality"
-            value={airQuality.data?.aqi ?? '—'}
+            value={airQuality.aqi ?? '—'}
             unit="AQI"
-            status={airQuality.data?.statusColor || 'nominal'}
+            status={airQuality.aqi > 150 ? 'alert' : airQuality.aqi > 50 ? 'warning' : 'nominal'}
           />
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-sm)', minWidth: 0 }}>
         <InstrumentGauge
           label="Wind Speed"
-          value={formatWindSpeed(weather.data?.windSpeed, units)}
+          value={formatWindSpeed(weather.windSpeed, units)}
           unit=""
           status="nominal"
         />
 
         <InstrumentGauge
-          label="Humidity & Pressure"
-          value={`${weather.data?.humidity ?? 55}%`}
-          unit={`${weather.data?.pressure ? Math.round(weather.data.pressure) : 1013} hPa`}
+          label="Pressure"
+          value={weather.pressure ? Math.round(weather.pressure) : 1013}
+          unit="hPa"
           status="nominal"
         />
       </div>
 
       <div className="instrument-gauge" style={{ minHeight: '76px' }}>
         <span className="instrument-gauge__label">Solar Schedule</span>
-        <div style={{ display: 'flex', gap: '16px', fontSize: '13px', fontFamily: 'var(--font-mono)', paddingTop: '4px' }}>
+        <div style={{ display: 'flex', gap: '12px', fontSize: 'var(--text-caption-sm)', fontFamily: 'var(--font-mono)', paddingTop: '4px', flexWrap: 'wrap' }}>
           <span>🌅 {sunMoon.data?.sunrise ? new Date(sunMoon.data.sunrise).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '06:12 AM'}</span>
-          <span style={{ color: 'var(--parchment-dim)' }}>|</span>
+          <span style={{ color: 'var(--color-mute)' }}>|</span>
           <span>🌇 {sunMoon.data?.sunset ? new Date(sunMoon.data.sunset).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '06:45 PM'}</span>
         </div>
       </div>
