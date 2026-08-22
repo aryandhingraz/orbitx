@@ -1,123 +1,137 @@
-# OrbitX — Multi-Page Instrument Panel for Planet Earth
+# OrbitX - Live Earth Instrument Panel
 
-> **A live, multi-page instrument panel for planet Earth — organized by purpose, not by accident.**  
-> OrbitX is built like an antique observatory desk equipped with modern telemetry sensors — brass dials, hand-ruled concentric orbit rings, tabular typography, and a WebGL planet Earth reporting real-time data from 9 keyless public APIs across six routed pages.
+[![Deploy OrbitX](https://github.com/aryandhingraz/orbitx/actions/workflows/deploy.yml/badge.svg)](https://github.com/aryandhingraz/orbitx/actions/workflows/deploy.yml)
+[![Live Site](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-0f766e?style=flat-square)](https://aryandhingraz.github.io/orbitx/)
+[![React](https://img.shields.io/badge/React-18-61dafb?style=flat-square&logo=react)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-5-646cff?style=flat-square&logo=vite)](https://vitejs.dev/)
+[![Three.js](https://img.shields.io/badge/Three.js-WebGL-000000?style=flat-square&logo=threedotjs)](https://threejs.org/)
+
+OrbitX is a live, multi-page observatory dashboard for planet Earth. It combines a custom WebGL globe, real-time environmental telemetry, satellite tracking, seismic activity, air-quality data, space-weather signals, and personal observation tools into one polished front-end application.
+
+Live project: **https://aryandhingraz.github.io/orbitx/**
 
 ---
 
-## 🌟 Architecture & Folder Organization
+## Project Highlights
 
-Every file in OrbitX is strictly organized by **purpose** under `src/` to satisfy front-end engineering modularity requirements and rubric folder guidelines:
+- Interactive Three.js/WebGL Earth with dedicated vanilla JavaScript globe engine
+- 10 routed observatory stations built with React Router
+- Real-time public API integrations for weather, air quality, earthquakes, ISS position, astronomy, exchange rates, natural events, and space weather
+- Canvas-based telemetry charts for trends, distributions, maps, and radar comparison views
+- Responsive app shell with desktop navigation rail and mobile-friendly routing
+- Persistent local observation journal with telemetry snapshots
+- GitHub Actions deployment pipeline that automatically publishes the live site after every push to `main`
 
+---
+
+## Live Pages
+
+| Station | Purpose |
+|---|---|
+| Home | Main observatory desk with interactive Earth, telemetry rings, and instrument gauges |
+| Explore | City-level weather, air-quality, pressure, and humidity analytics |
+| Compare | Multi-city environmental comparison with radar-style visualization |
+| Satellites | Live ISS position, satellite telemetry, and orbital tracking interface |
+| Alerts | Aggregated environmental alert command center |
+| Space Weather | NOAA SWPC geomagnetic and solar-wind telemetry |
+| Earth Watch | NASA EONET natural events, earthquakes, and safety context |
+| Journal | Personal telemetry ledger for saved observations |
+| Settings | Display units, refresh cadence, theme, and interface preferences |
+| About | Architecture notes, public API credits, and evaluation mapping |
+
+---
+
+## Tech Stack
+
+| Area | Tools |
+|---|---|
+| Frontend | React 18, React Router |
+| Build Tool | Vite |
+| 3D Graphics | Three.js, WebGL |
+| Data Visualization | Canvas 2D, custom chart components |
+| Styling | Vanilla CSS, design tokens, responsive layouts |
+| Deployment | GitHub Pages, GitHub Actions |
+
+---
+
+## Public Data Sources
+
+OrbitX uses keyless public APIs and browser-native capabilities:
+
+| Data | Source |
+|---|---|
+| Weather forecast | Open-Meteo Weather Forecast API |
+| Air quality | Open-Meteo Air Quality API |
+| City search | Open-Meteo Geocoding API |
+| Earthquakes | USGS Earthquake GeoJSON Feed |
+| ISS position | WhereTheISS Satellite API |
+| Solar schedule | Sunrise-Sunset.org API |
+| Exchange rates | Open ER Exchange Rates API |
+| Natural events | NASA EONET V3 Events API |
+| Space weather | NOAA SWPC Space Weather APIs |
+| Current location | Browser Geolocation API |
+
+---
+
+## Architecture
+
+The project is organized by purpose under `src/`:
+
+```text
+src/
+  components/   Reusable interface and chart components
+  context/      App-wide settings and telemetry state
+  globe/        Isolated Three.js/WebGL globe engine
+  hooks/        Data-fetching and browser API hooks
+  pages/        Routed station screens
+  styles/       Global CSS, layout rules, tokens, and component styles
+  utils/        Pure formatting, conversion, color, export, and helper logic
 ```
-orbitx/
-├─ index.html                     # Single entry point — mounts <div id="root">
-├─ package.json                   # React 18, React Router, Three.js dependencies
-├─ vite.config.js                 # Vite dev & build configuration
-├─ .gitignore                     # Git exclusion rules
-├─ README.md                      # Complete system documentation
-├─ src/
-   ├─ main.jsx                    # ReactDOM.createRoot mount
-   ├─ App.jsx                     # Root application wrapper with SettingsProvider
-   ├─ router.jsx                  # HashRouter routing 6 active page routes
-   │
-   ├─ context/                    # App-wide global state
-   │  └─ SettingsContext.jsx      # Measurement units, Auto/Day/Night themes, refresh rates
-   │
-   ├─ styles/                     # Vanilla CSS3 tokens and component stylesheets
-   │  ├─ tokens.css               # Color tokens (navy, brass, verdigris), typography, spacing
-   │  ├─ base.css                 # Reset, focus-visible outlines, scrollbars
-   │  ├─ layout.css               # App shell, responsive breakpoints, print styles
-   │  └─ components/               # Dedicated stylesheet per component
-   │
-   ├─ globe/                      # Vanilla JS WebGL showcase (Isolated from React)
-   │  ├─ Globe.jsx                # Thin React wrapper with mount/unmount cleanup
-   │  └─ globeEngine.js           # Pure Vanilla JS + Three.js — zero React imports!
-   │
-   ├─ hooks/                      # Custom data hooks for public endpoints
-   │  ├─ useGeolocation.js       # Browser geolocation API
-   │  ├─ useWeather.js           # Open-Meteo current forecast & 7-day trend
-   │  ├─ useAirQuality.js        # Open-Meteo 24-hour US & EU AQI
-   │  ├─ useQuakes.js            # USGS 24-hour seismic GeoJSON feed
-   │  ├─ useISS.js               # WhereTheISS satellite tracking (5s poll)
-   │  ├─ useSunAndMoon.js        # Sunrise-Sunset API + Conway moon phase math
-   │  ├─ useCurrency.js          # Frankfurter Forex exchange rates
-   │  ├─ useWorldClocks.js       # 1-second ticking Intl.DateTimeFormat clocks
-   │  └─ useGeocodingSearch.js    # Debounced city search API
-   │
-   ├─ components/                 # Reusable UI components
-   │  ├─ NavRail.jsx              # Responsive navigation rail (Sidebar / Bottom tab bar)
-   │  ├─ OrbitRing.jsx            # SVG concentric rotating orbit ring
-   │  ├─ OrbitMarker.jsx          # Interactive brass marker button
-   │  ├─ InstrumentGauge.jsx      # Circular brass-bezel telemetry readout
-   │  ├─ InstrumentStrip.jsx      # Bar container for gauges
-   │  ├─ DataPanel.jsx            # Sliding telemetry side drawer with focus trap
-   │  ├─ ErrorBadge.jsx           # Signal-coral error fallback indicator
-   │  ├─ SkeletonPulse.jsx        # Brass shimmer loading placeholder
-   │  ├─ KeyboardShortcutOverlay.jsx # Keybindings overlay (?, 1-6, Esc, /)
-   │  ├─ Starfield.jsx            # Ambient Canvas 2D star background
-   │  └─ OfflineBanner.jsx        # Online/offline browser state listener
-   │
-   ├─ pages/                      # Routed page components
-   │  ├─ Home.jsx                 # WebGL Globe + 3 Orbit Rings + Instrument Strip
-   │  ├─ Explore.jsx              # 4 hand-drawn Canvas 2D telemetry trend charts
-   │  ├─ Compare.jsx              # Multi-city side-by-side comparison tool
-   │  ├─ Journal.jsx              # Persistent telemetry ledger & canvas PNG export
-   │  ├─ Settings.jsx             # Instrument display config & theme controls
-   │  └─ About.jsx                # Architecture notes & API credits
-   │
-   └─ utils/                      # Pure helper functions
-      ├─ moonPhase.js             # Conway synodic-month lunar calculation
-      ├─ angleMath.js             # Lat/Lon/Time to ring angle conversions
-      ├─ formatters.js            # Null-safe number/time/currency formatters
-      ├─ unitConversion.js        # Temperature (°C/°F) and speed (km/h / mph) conversions
-      └─ snapshotExport.js        # Canvas 2D image renderer & PNG download
-```
+
+The main DOM/WebGL showcase is `src/globe/globeEngine.js`, which is intentionally isolated from React. It handles canvas rendering, Three.js scene construction, pointer interactions, animation, raycasting, and cleanup.
 
 ---
 
-## 📌 Note for Course Evaluator (Rubric Alignment)
+## Local Development
 
-> **Component 2 — DOM Manipulation Showcase:**  
-> Evaluators are explicitly directed to [`src/globe/globeEngine.js`](file:///d:/FEE2_Project_Evaluation_1/src/globe/globeEngine.js). This module contains **pure vanilla JavaScript DOM and WebGL manipulation using Three.js** — completely free of React imports or hooks. It creates canvas textures, sphere geometry, atmosphere shaders, mouse drag listeners, and handles explicit WebGL memory disposal (`dispose()`) on unmount. The rest of the application demonstrates modern React 18 component composition, custom hooks, and context management.
-
----
-
-## 🚀 Setup & Execution
-
-### Prerequisites
-- Node.js (v18.0.0 or higher)
-- npm (v9.0.0 or higher)
-
-### Quick Start
 ```bash
-# 1. Install dependencies
 npm install
-
-# 2. Run local development server
 npm run dev
+```
 
-# 3. Build for production
+Production build:
+
+```bash
 npm run build
 ```
 
----
+Preview the production build locally:
 
-## 🌐 Public Keyless APIs Used
-
-| Feature | Endpoint URL | Poll Interval |
-|---|---|---|
-| **Weather** | [api.open-meteo.com/v1/forecast](https://open-meteo.com/) | 10 min |
-| **Air Quality** | [air-quality-api.open-meteo.com/v1/air-quality](https://open-meteo.com/en/docs/air-quality-api) | 10 min |
-| **Earthquakes** | [earthquake.usgs.gov](https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php) | 5 min |
-| **ISS Satellite** | [api.wheretheiss.at/v1/satellites/25544](https://wheretheiss.at/w/developer) | 5 sec |
-| **Solar Schedule** | [api.sunrise-sunset.org/json](https://sunrise-sunset.org/api) | 1 hr |
-| **Forex Currency** | [api.frankfurter.app/latest](https://www.frankfurter.app/docs/) | 30 min |
-| **City Geocoding** | [geocoding-api.open-meteo.com/v1/search](https://open-meteo.com/en/docs/geocoding-api) | On search |
+```bash
+npm run preview
+```
 
 ---
 
-## ⚠️ Known Limitations
+## Deployment
 
-1. **Geolocation Permission**: Browsers require user permission for `navigator.geolocation`. If denied or blocked, OrbitX gracefully defaults to the Greenwich Royal Observatory (`51.4769° N, 0.0005° W`).
-2. **Offline Fallback**: When network access is lost, OrbitX displays an `OfflineBanner` and retains the last known telemetry feeds in memory without crashing.
+The repository is configured with GitHub Actions. Every push to `main` installs dependencies, builds OrbitX with the correct GitHub Pages base path, and publishes the latest production build automatically.
+
+Live deployment:
+
+```text
+https://aryandhingraz.github.io/orbitx/
+```
+
+---
+
+## Academic Integrity Notice
+
+OrbitX is an original Front End Engineering evaluation project by Aryan Dhingra. The repository is public for review, demonstration, and portfolio visibility. Please do not copy or submit this work as your own.
+
+---
+
+## Author
+
+**Aryan Dhingra**  
+GitHub: [@aryandhingraz](https://github.com/aryandhingraz)
