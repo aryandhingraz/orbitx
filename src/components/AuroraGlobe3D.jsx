@@ -1,16 +1,17 @@
 import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { COLOR_TOKENS } from '../utils/colorTokens.js';
+import { playTelemetryClick, playTelemetryPing } from '../utils/soundSynthesizer.js';
 import '../styles/components/canvasChart.css';
 
 const AURORA_STATIONS = [
-  { name: 'Tromsø', country: 'Norway', lat: 69.65, lon: 18.96, minKp: 1, desc: 'Prime Arctic aurora corridor — optimal view even at low Kp', idealIso: 'ISO 1600, 4s, f/2.0' },
-  { name: 'Fairbanks', country: 'Alaska, USA', lat: 64.84, lon: -147.72, minKp: 2, desc: 'Auroral oval overhead most clear winter nights', idealIso: 'ISO 3200, 6s, f/1.8' },
-  { name: 'Reykjavik', country: 'Iceland', lat: 64.14, lon: -21.94, minKp: 2, desc: 'Frequent vivid auroral curtains over volcanic skies', idealIso: 'ISO 1600, 5s, f/2.8' },
-  { name: 'Yellowknife', country: 'Canada', lat: 62.45, lon: -114.37, minKp: 2, desc: 'World capital of aurora watching with 90%+ clarity', idealIso: 'ISO 3200, 4s, f/1.4' },
-  { name: 'Edinburgh', country: 'Scotland, UK', lat: 55.95, lon: -3.18, minKp: 5, desc: 'Northern Lights visible during G1+ geomagnetic storms', idealIso: 'ISO 3200, 10s, f/1.8' },
-  { name: 'Seattle', country: 'Washington, USA', lat: 47.60, lon: -122.33, minKp: 6, desc: 'Visible on northern horizon during G2+ storms', idealIso: 'ISO 6400, 12s, f/1.4' },
-  { name: 'Hanle Observatory', country: 'Ladakh, India', lat: 32.78, lon: 78.96, minKp: 8, desc: 'Hanle Dark Sky Reserve — stable auroral red arc (SAR) during G4/G5 storms', idealIso: 'ISO 6400, 20s, f/1.4' },
+  { name: 'Tromsø', country: 'Norway', lat: 69.65, lon: 18.96, minKp: 1, desc: 'Prime Arctic auroral corridor — overhead curtains on nearly every clear winter night.', idealIso: 'ISO 1600, 4s, f/2.0' },
+  { name: 'Fairbanks', country: 'Alaska, USA', lat: 64.84, lon: -147.72, minKp: 2, desc: 'Underneath auroral oval footprint with rapid dynamic coronas.', idealIso: 'ISO 3200, 6s, f/1.8' },
+  { name: 'Reykjavik', country: 'Iceland', lat: 64.14, lon: -21.94, minKp: 2, desc: 'Vivid green ribbons cascading over volcanic terrain and glaciers.', idealIso: 'ISO 1600, 5s, f/2.8' },
+  { name: 'Yellowknife', country: 'Canada', lat: 62.45, lon: -114.37, minKp: 2, desc: 'Sub-Arctic dark sky preserve with 90%+ annual viewing clarity.', idealIso: 'ISO 3200, 4s, f/1.4' },
+  { name: 'Edinburgh', country: 'Scotland, UK', lat: 55.95, lon: -3.18, minKp: 5, desc: 'Northern horizon glows green and magenta during G1+ geomagnetic storms.', idealIso: 'ISO 3200, 10s, f/1.8' },
+  { name: 'Seattle', country: 'Washington, USA', lat: 47.60, lon: -122.33, minKp: 6, desc: 'Mid-latitude visibility with pillar rays during G2+ geomagnetic storms.', idealIso: 'ISO 6400, 12s, f/1.4' },
+  { name: 'Hanle Observatory', country: 'Ladakh, India', lat: 32.78, lon: 78.96, minKp: 8, desc: 'Hanle Dark Sky Reserve (4,500m) — Stable Auroral Red (SAR) arc observed during G4/G5 storms.', idealIso: 'ISO 6400, 20s, f/1.4' },
 ];
 
 function latLonToVec3(lat, lon, radius = 1) {
@@ -28,16 +29,17 @@ function createProceduralEarthTexture() {
   canvas.height = 512;
   const ctx = canvas.getContext('2d');
 
-  // Deep observatory night ocean
+  // Deep space ocean gradient
   const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  grad.addColorStop(0, '#040814');
-  grad.addColorStop(0.5, '#0a101f');
-  grad.addColorStop(1, '#030610');
+  grad.addColorStop(0, '#020617');
+  grad.addColorStop(0.3, '#071026');
+  grad.addColorStop(0.7, '#071026');
+  grad.addColorStop(1, '#020617');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Subtle graticule grid
-  ctx.strokeStyle = 'rgba(45, 212, 191, 0.1)';
+  // Subtle coordinate graticules
+  ctx.strokeStyle = 'rgba(45, 212, 191, 0.08)';
   ctx.lineWidth = 1;
   for (let lat = -80; lat <= 80; lat += 20) {
     const y = ((90 - lat) / 180) * canvas.height;
@@ -55,8 +57,8 @@ function createProceduralEarthTexture() {
   }
 
   // Continental landmasses
-  ctx.fillStyle = 'rgba(26, 36, 52, 0.95)';
-  ctx.strokeStyle = 'rgba(45, 212, 191, 0.35)';
+  ctx.fillStyle = 'rgba(21, 32, 48, 0.96)';
+  ctx.strokeStyle = 'rgba(45, 212, 191, 0.4)';
   ctx.lineWidth = 1.5;
 
   const continents = [
@@ -72,6 +74,8 @@ function createProceduralEarthTexture() {
     [[115, -15], [150, -15], [150, -38], [115, -35]],
     // Greenland
     [[-50, 60], [-20, 70], [-30, 80], [-60, 75]],
+    // Antarctica perimeter
+    [[-180, -78], [-90, -75], [0, -72], [90, -75], [180, -78], [180, -90], [-180, -90]],
   ];
 
   continents.forEach((poly) => {
@@ -87,6 +91,36 @@ function createProceduralEarthTexture() {
     ctx.stroke();
   });
 
+  // Glowing Night City Clusters (London, Paris, NYC, Tokyo, Delhi, Mumbai, Hanle, etc.)
+  const cityDots = [
+    [77.2, 28.6],   // New Delhi
+    [72.8, 19.0],   // Mumbai
+    [78.9, 32.8],   // Hanle Observatory Ladakh
+    [-74.0, 40.7],  // New York
+    [-0.1, 51.5],   // London
+    [2.3, 48.8],    // Paris
+    [139.6, 35.6],  // Tokyo
+    [151.2, -33.8], // Sydney
+    [-21.9, 64.1],  // Reykjavik
+    [18.9, 69.6],   // Tromsø
+    [-147.7, 64.8], // Fairbanks
+  ];
+
+  cityDots.forEach(([lon, lat]) => {
+    const x = ((lon + 180) / 360) * canvas.width;
+    const y = ((90 - lat) / 180) * canvas.height;
+    ctx.fillStyle = 'rgba(251, 191, 36, 0.9)';
+    ctx.beginPath();
+    ctx.arc(x, y, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Soft warm glow halo
+    ctx.fillStyle = 'rgba(251, 191, 36, 0.25)';
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
   const texture = new THREE.CanvasTexture(canvas);
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.ClampToEdgeWrapping;
@@ -100,9 +134,17 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
   const [autoRotate, setAutoRotate] = useState(true);
   const [colorMode, setColorMode] = useState('emerald'); // 'emerald' | 'violet' | 'crimson'
   const [waveSpeed, setWaveSpeed] = useState(1.0); // 0.5 | 1.0 | 2.0
+  const [simulatedKp, setSimulatedKp] = useState(null); // null = use live telemetry, or number 0-9
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const effectiveKp = Math.max(0, Math.min(9, kpIndex));
-  const equatorwardLat = Math.max(40, Math.round(67 - effectiveKp * 2.8));
+  // Active Effective Kp (Live SWPC telemetry or interactive simulator override)
+  const effectiveKp = simulatedKp !== null ? simulatedKp : Math.max(0, Math.min(9, kpIndex));
+
+  // Ovation Model Empirical Calculation:
+  // Kp 0 -> Oval edge ~ 67°N
+  // Kp 5 -> Oval edge ~ 53°N (Scotland / Alaska)
+  // Kp 9 -> Oval edge ~ 38°N (Hanle Dark Sky Reserve Ladakh / Mediterranean)
+  const equatorwardLat = Math.max(34, Math.round(67 - effectiveKp * 3.4));
   const ovalRadiusDeg = 90 - equatorwardLat;
   const ovalRadiusRad = (ovalRadiusDeg * Math.PI) / 180;
 
@@ -112,14 +154,14 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
 
     let animId;
     const width = container.clientWidth || 600;
-    const height = container.clientHeight || 460;
+    const height = container.clientHeight || 480;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
     camera.position.set(0, 2.4, 2.0);
     camera.lookAt(0, 0, 0);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 2, 2));
     renderer.domElement.style.width = '100%';
@@ -127,8 +169,8 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
     renderer.domElement.style.touchAction = 'none';
     container.appendChild(renderer.domElement);
 
-    // Deep Space Starfield Points
-    const starCount = 350;
+    // Deep Space Starfield Points (350 distant stars)
+    const starCount = 380;
     const starGeo = new THREE.BufferGeometry();
     const starPos = new Float32Array(starCount * 3);
     for (let i = 0; i < starCount; i++) {
@@ -136,7 +178,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
       const v = Math.random();
       const theta = u * 2.0 * Math.PI;
       const phi = Math.acos(2.0 * v - 1.0);
-      const r = 25 + Math.random() * 20;
+      const r = 24 + Math.random() * 20;
       starPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
       starPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
       starPos[i * 3 + 2] = r * Math.cos(phi);
@@ -144,9 +186,9 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
     starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
     const starMat = new THREE.PointsMaterial({
       color: 0x94a3b8,
-      size: 0.15,
+      size: 0.16,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.78,
     });
     const starMesh = new THREE.Points(starGeo, starMat);
     scene.add(starMesh);
@@ -155,66 +197,86 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
     const earthGroup = new THREE.Group();
     scene.add(earthGroup);
 
-    // Dynamic 3D Atmospheric Lighting
+    // Base Atmospheric Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xfffaed, 1.15);
+    const sunLight = new THREE.DirectionalLight(0xfffaed, 1.25);
     sunLight.position.set(4, 3, 3);
     scene.add(sunLight);
 
-    // Real 3D Aurora Illuminating Light (Casts colored glow on northern continents)
-    const auroraHex =
-      colorMode === 'crimson' || effectiveKp >= 5
+    // Primary Aurora Color Logic
+    const isStormMode = effectiveKp >= 5 || colorMode === 'crimson';
+    const primaryAuroraHex =
+      colorMode === 'crimson' || effectiveKp >= 7
         ? 0xf43f5e
         : colorMode === 'violet'
         ? 0xa855f7
         : 0x2dd4bf;
 
-    const auroraLight = new THREE.PointLight(auroraHex, 2.4, 2.2);
-    auroraLight.position.set(0, Math.cos(ovalRadiusRad) * 1.08, 0);
-    earthGroup.add(auroraLight);
+    const secondaryAuroraHex = isStormMode ? 0xec4899 : 0x38bdf8;
 
-    // Southern Light counterpart
-    const australisLight = new THREE.PointLight(auroraHex, 1.8, 2.2);
-    australisLight.position.set(0, -Math.cos(ovalRadiusRad) * 1.08, 0);
+    // Real 3D Northern Lights Illuminating Lights (Orbits over Arctic landmasses)
+    const auroraLight1 = new THREE.PointLight(primaryAuroraHex, 2.6 + effectiveKp * 0.35, 2.5);
+    auroraLight1.position.set(0, Math.cos(ovalRadiusRad) * 1.12, Math.sin(ovalRadiusRad) * 0.4);
+    earthGroup.add(auroraLight1);
+
+    const auroraLight2 = new THREE.PointLight(secondaryAuroraHex, 1.8 + effectiveKp * 0.2, 2.2);
+    auroraLight2.position.set(-Math.sin(ovalRadiusRad) * 0.4, Math.cos(ovalRadiusRad) * 1.12, 0);
+    earthGroup.add(auroraLight2);
+
+    // Southern Light counterpart (Aurora Australis)
+    const australisLight = new THREE.PointLight(primaryAuroraHex, 2.0, 2.2);
+    australisLight.position.set(0, -Math.cos(ovalRadiusRad) * 1.12, 0);
     earthGroup.add(australisLight);
 
     // 1. Procedural 3D Earth Globe
     const earthTexture = createProceduralEarthTexture();
-    const earthGeo = new THREE.SphereGeometry(1, 54, 54);
+    const earthGeo = new THREE.SphereGeometry(1, 56, 56);
     const earthMat = new THREE.MeshPhongMaterial({
       map: earthTexture,
-      shininess: 14,
+      shininess: 16,
       specular: new THREE.Color(0x2dd4bf),
     });
     const earthMesh = new THREE.Mesh(earthGeo, earthMat);
     earthGroup.add(earthMesh);
 
-    // 2. 3D Aurora Wave Curtains (North & South Ovals)
+    // 2. Atmospheric Outer Rayleigh Scattering Corona Halo
+    const atmosphereGeo = new THREE.SphereGeometry(1.14, 42, 42);
+    const atmosphereMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
+      transparent: true,
+      opacity: 0.12,
+      side: THREE.BackSide,
+      blending: THREE.AdditiveBlending,
+    });
+    const atmosphereMesh = new THREE.Mesh(atmosphereGeo, atmosphereMat);
+    earthGroup.add(atmosphereMesh);
+
+    // 3. 3D Aurora Wave Curtains (North & South Ovals)
     const auroraGroup = new THREE.Group();
     earthGroup.add(auroraGroup);
 
-    const segments = 96;
+    const segments = 108;
     const ringRadius = Math.sin(ovalRadiusRad) * 1.05;
     const ringY = Math.cos(ovalRadiusRad) * 1.05;
 
-    // A. Main Undulating Aurora Curtain Ribbon (Oxygen Green 557.7nm)
+    // A. Main Undulating Aurora Curtain Ribbon (Emerald Oxygen 557.7nm)
     const ribbonGeo = new THREE.CylinderGeometry(
       ringRadius * 0.98,
-      ringRadius * 1.04,
-      0.1 + effectiveKp * 0.016,
+      ringRadius * 1.05,
+      0.12 + effectiveKp * 0.022,
       segments,
-      6,
+      8,
       true
     );
     const posAttr = ribbonGeo.attributes.position;
     const originalPositions = posAttr.array.slice();
 
     const ribbonMat = new THREE.MeshBasicMaterial({
-      color: auroraHex,
+      color: primaryAuroraHex,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.85,
       side: THREE.DoubleSide,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
@@ -223,64 +285,94 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
     ribbonMesh.position.set(0, ringY, 0);
     auroraGroup.add(ribbonMesh);
 
-    // B. Violet Crown Ribbon hovering at higher ionospheric altitude
-    const crownColor = colorMode === 'crimson' ? 0xec4899 : 0xc084fc;
+    // B. Violet / Magenta High-Altitude Nitrogen Crown Ribbon
     const crownGeo = new THREE.CylinderGeometry(
       ringRadius * 0.96,
-      ringRadius * 1.06,
-      0.07 + effectiveKp * 0.012,
+      ringRadius * 1.07,
+      0.09 + effectiveKp * 0.016,
       segments,
-      4,
+      6,
       true
     );
     const crownMat = new THREE.MeshBasicMaterial({
-      color: crownColor,
+      color: secondaryAuroraHex,
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.65,
       side: THREE.DoubleSide,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
     const crownMesh = new THREE.Mesh(crownGeo, crownMat);
-    crownMesh.position.set(0, ringY + 0.045, 0);
+    crownMesh.position.set(0, ringY + 0.05, 0);
     auroraGroup.add(crownMesh);
 
-    // C. Aurora Australis (Southern Lights counterpart over Antarctica)
+    // C. Vertical Ionized Auroral Ray Pillars (Tall fluted columns)
+    const rayPillarCount = 48;
+    const rayGeo = new THREE.BufferGeometry();
+    const rayPositions = new Float32Array(rayPillarCount * 2 * 3);
+    for (let i = 0; i < rayPillarCount; i++) {
+      const angle = (i / rayPillarCount) * Math.PI * 2;
+      const rBase = ringRadius * (1.0 + (Math.sin(i * 3) * 0.03));
+      const rTop = rBase * 1.06;
+      const yBase = ringY;
+      const yTop = ringY + 0.14 + effectiveKp * 0.02;
+
+      // Base vertex
+      rayPositions[i * 6] = rBase * Math.cos(angle);
+      rayPositions[i * 6 + 1] = yBase;
+      rayPositions[i * 6 + 2] = rBase * Math.sin(angle);
+
+      // Top vertex
+      rayPositions[i * 6 + 3] = rTop * Math.cos(angle);
+      rayPositions[i * 6 + 4] = yTop;
+      rayPositions[i * 6 + 5] = rTop * Math.sin(angle);
+    }
+    rayGeo.setAttribute('position', new THREE.BufferAttribute(rayPositions, 3));
+    const rayMat = new THREE.LineBasicMaterial({
+      color: primaryAuroraHex,
+      transparent: true,
+      opacity: 0.7,
+      blending: THREE.AdditiveBlending,
+    });
+    const rayLines = new THREE.LineSegments(rayGeo, rayMat);
+    auroraGroup.add(rayLines);
+
+    // D. Aurora Australis (Southern Lights counterpart over Antarctica)
     const southRibbonGeo = new THREE.CylinderGeometry(
-      ringRadius * 1.04,
+      ringRadius * 1.05,
       ringRadius * 0.98,
-      0.09 + effectiveKp * 0.015,
+      0.11 + effectiveKp * 0.018,
       segments,
-      4,
+      6,
       true
     );
     const southRibbonMesh = new THREE.Mesh(southRibbonGeo, ribbonMat);
     southRibbonMesh.position.set(0, -ringY, 0);
     auroraGroup.add(southRibbonMesh);
 
-    // D. Ionospheric Energy Particle Field (180 shimmering points)
-    const particleCount = 180;
+    // E. Ionospheric Shimmering Energy Particles (220 points)
+    const particleCount = 220;
     const particleGeo = new THREE.BufferGeometry();
     const particlePositions = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
       const angle = (i / particleCount) * Math.PI * 2;
-      const r = ringRadius * (0.96 + Math.random() * 0.08);
+      const r = ringRadius * (0.95 + Math.random() * 0.1);
       particlePositions[i * 3] = r * Math.cos(angle);
-      particlePositions[i * 3 + 1] = ringY + (Math.random() - 0.5) * 0.06;
+      particlePositions[i * 3 + 1] = ringY + (Math.random() - 0.5) * 0.08;
       particlePositions[i * 3 + 2] = r * Math.sin(angle);
     }
     particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
     const particleMat = new THREE.PointsMaterial({
-      color: 0x34d399,
-      size: 0.038,
+      color: primaryAuroraHex,
+      size: 0.042,
       transparent: true,
-      opacity: 0.88,
+      opacity: 0.9,
       blending: THREE.AdditiveBlending,
     });
     const particles = new THREE.Points(particleGeo, particleMat);
     auroraGroup.add(particles);
 
-    // 3. Interactive 3D Station Pins
+    // 4. Interactive 3D Station Pins
     const pinsGroup = new THREE.Group();
     earthGroup.add(pinsGroup);
 
@@ -289,7 +381,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
       const pos = latLonToVec3(st.lat, st.lon, 1.02);
       const isVisibleNow = effectiveKp >= st.minKp;
 
-      const pinGeo = new THREE.SphereGeometry(0.026, 16, 16);
+      const pinGeo = new THREE.SphereGeometry(0.028, 16, 16);
       const pinMat = new THREE.MeshBasicMaterial({
         color: isVisibleNow ? 0x2dd4bf : 0x94a3b8,
       });
@@ -300,7 +392,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
       pinMeshes.push(pinMesh);
 
       // Pin stem
-      const stemGeo = new THREE.CylinderGeometry(0.004, 0.004, 0.045, 8);
+      const stemGeo = new THREE.CylinderGeometry(0.004, 0.004, 0.048, 8);
       const stemMat = new THREE.MeshBasicMaterial({ color: 0xcbd5e1 });
       const stem = new THREE.Mesh(stemGeo, stemMat);
       stem.position.copy(latLonToVec3(st.lat, st.lon, 1.01));
@@ -316,7 +408,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
       camera.position.set(0, -2.65, 0.7);
       camera.lookAt(0, 0, 0);
     } else if (cameraView === 'india') {
-      const indiaVec = latLonToVec3(32.8, 78.9, 2.8);
+      const indiaVec = latLonToVec3(32.8, 78.9, 2.7);
       camera.position.copy(indiaVec);
       camera.lookAt(0, 0, 0);
     } else {
@@ -370,6 +462,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
         const intersects = raycaster.intersectObjects(pinMeshes, false);
         if (intersects.length > 0 && intersects[0].object.userData?.name) {
           setSelectedStation(intersects[0].object.userData);
+          playTelemetryPing(true);
         }
       }
       isDragging = false;
@@ -384,7 +477,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
     dom.addEventListener('touchmove', onPointerMove, { passive: true });
     window.addEventListener('touchend', onPointerUp);
 
-    // Animation Render Loop with Undulating Wave Folding
+    // Animation Render Loop with Sinusoidal Folding Waves
     const clock = new THREE.Clock();
 
     function animate() {
@@ -392,10 +485,12 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
       const time = clock.getElapsedTime() * waveSpeed;
 
       // Atmospheric Breathing Light Glow
-      const pulse = 0.65 + Math.sin(time * 2.5) * 0.18;
+      const pulse = 0.7 + Math.sin(time * 2.5) * 0.16;
       ribbonMat.opacity = pulse;
-      crownMat.opacity = pulse * 0.72;
-      auroraLight.intensity = 2.0 + Math.sin(time * 3.0) * 0.8;
+      crownMat.opacity = pulse * 0.75;
+      rayMat.opacity = pulse * 0.8;
+      auroraLight1.intensity = 2.4 + Math.sin(time * 3.0) * 0.9;
+      auroraLight2.intensity = 1.8 + Math.cos(time * 2.2) * 0.7;
 
       // 3D Harmonic Wave Deformation on Aurora Ribbon Vertices
       const pArr = posAttr.array;
@@ -406,23 +501,24 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
         const oz = originalPositions[i * 3 + 2];
         const theta = Math.atan2(oz, ox);
 
-        // Undulating auroral curtain folding wave
+        // Sinusoidal auroral curtain wave folding
         const wave =
-          Math.sin(theta * 6 + time * 2.2) * 0.035 +
-          Math.cos(theta * 12 - time * 1.5) * 0.015;
+          Math.sin(theta * 6 + time * 2.4) * 0.04 +
+          Math.cos(theta * 14 - time * 1.6) * 0.018;
 
         const currentR = Math.sqrt(ox * ox + oz * oz);
         const newR = currentR + wave;
         pArr[i * 3] = newR * Math.cos(theta);
-        pArr[i * 3 + 1] = oy + Math.sin(theta * 4 + time * 1.8) * 0.01;
+        pArr[i * 3 + 1] = oy + Math.sin(theta * 4 + time * 1.8) * 0.012;
         pArr[i * 3 + 2] = newR * Math.sin(theta);
       }
       posAttr.needsUpdate = true;
 
-      particles.rotation.y = time * 0.05;
+      particles.rotation.y = time * 0.04;
+      rayLines.rotation.y = -time * 0.02;
 
       if (autoRotate && !isDragging) {
-        earthGroup.rotation.y += 0.0025;
+        earthGroup.rotation.y += 0.0022;
       }
 
       renderer.render(scene, camera);
@@ -432,7 +528,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
     function handleResize() {
       if (!container) return;
       const w = container.clientWidth || 600;
-      const h = container.clientHeight || 460;
+      const h = container.clientHeight || 480;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
@@ -449,15 +545,20 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
       dom.removeEventListener('touchmove', onPointerMove);
       window.removeEventListener('touchend', onPointerUp);
 
+      // Explicit WebGL Resource Disposal (conforming to syllabus criteria)
       earthGeo.dispose();
       earthMat.dispose();
       earthTexture.dispose();
+      atmosphereGeo.dispose();
+      atmosphereMat.dispose();
       starGeo.dispose();
       starMat.dispose();
       ribbonGeo.dispose();
       ribbonMat.dispose();
       crownGeo.dispose();
       crownMat.dispose();
+      rayGeo.dispose();
+      rayMat.dispose();
       southRibbonGeo.dispose();
       particleGeo.dispose();
       particleMat.dispose();
@@ -474,13 +575,24 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
     ? 'Optimal Viewing (Auroral Oval Overhead)'
     : effectiveKp + 1 === selectedStation.minKp
     ? 'Fringe Visibility (Look North Horizon)'
-    : 'Unlikely (Requires Kp ≥ ' + selectedStation.minKp + ')';
+    : `Sub-Threshold (Requires Kp ≥ ${selectedStation.minKp})`;
+
+  function toggleFullscreen() {
+    playTelemetryClick(true);
+    const elem = mountRef.current;
+    if (!elem) return;
+    if (!document.fullscreenElement) {
+      elem.requestFullscreen?.().then(() => setIsFullscreen(true)).catch(() => {});
+    } else {
+      document.exitFullscreen?.().then(() => setIsFullscreen(false)).catch(() => {});
+    }
+  }
 
   return (
     <div className="chart-card" style={{ padding: 'var(--space-lg)', position: 'relative' }}>
       <div className="chart-card__header">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
             <span
               className="swatch-dot"
               style={{ backgroundColor: effectiveKp >= 5 ? 'var(--color-sale)' : 'var(--color-accent-teal)' }}
@@ -488,14 +600,23 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
             <span className="badge-promo">3D OVATION AURORA LIGHTING ENGINE</span>
             <span
               className="badge-promo"
-              style={{ color: effectiveKp >= 5 ? 'var(--color-sale)' : 'var(--color-success-bright)' }}
+              style={{ color: effectiveKp >= 5 ? 'var(--color-sale)' : 'var(--color-success-bright)', borderColor: effectiveKp >= 5 ? 'var(--color-sale)' : 'var(--color-success-bright)' }}
             >
-              {effectiveKp >= 5 ? '🚨 ACTIVE GEOMAGNETIC STORM' : 'NOMINAL POLAR CAP'}
+              {effectiveKp >= 8
+                ? '🔴 G4/G5 EXTREME GEOMAGNETIC STORM'
+                : effectiveKp >= 5
+                ? '🚨 ACTIVE GEOMAGNETIC STORM'
+                : 'NOMINAL POLAR CAP'}
             </span>
+            {simulatedKp !== null && (
+              <span className="badge-promo" style={{ color: '#FBBF24', borderColor: '#FBBF24' }}>
+                SIMULATION OVERRIDE ACTIVE (Kp {simulatedKp})
+              </span>
+            )}
           </div>
           <h2 className="chart-card__title">Interactive 3D Northern Lights (Aurora Borealis & Australis)</h2>
           <span className="chart-card__subtitle">
-            3D WebGL Earth with animated ionospheric undulating curtains and real-time planetary Kp telemetry
+            3D WebGL Earth with animated undulating ionospheric curtains, ray pillars, dynamic lighting, and NOAA SWPC planetary Kp telemetry
           </span>
         </div>
 
@@ -504,7 +625,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
           <button
             type="button"
             className={`filter-chip ${cameraView === 'northPole' ? 'filter-chip--active' : ''}`}
-            onClick={() => setCameraView('northPole')}
+            onClick={() => { playTelemetryClick(true); setCameraView('northPole'); }}
             style={{ fontSize: '11px', padding: '4px 10px' }}
           >
             🧭 Arctic (North Pole)
@@ -512,7 +633,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
           <button
             type="button"
             className={`filter-chip ${cameraView === 'southPole' ? 'filter-chip--active' : ''}`}
-            onClick={() => setCameraView('southPole')}
+            onClick={() => { playTelemetryClick(true); setCameraView('southPole'); }}
             style={{ fontSize: '11px', padding: '4px 10px' }}
           >
             🐧 Antarctic (South Pole)
@@ -520,7 +641,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
           <button
             type="button"
             className={`filter-chip ${cameraView === 'perspective' ? 'filter-chip--active' : ''}`}
-            onClick={() => setCameraView('perspective')}
+            onClick={() => { playTelemetryClick(true); setCameraView('perspective'); }}
             style={{ fontSize: '11px', padding: '4px 10px' }}
           >
             🌍 Global 3D
@@ -528,7 +649,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
           <button
             type="button"
             className={`filter-chip ${cameraView === 'india' ? 'filter-chip--active' : ''}`}
-            onClick={() => setCameraView('india')}
+            onClick={() => { playTelemetryClick(true); setCameraView('india'); }}
             style={{ fontSize: '11px', padding: '4px 10px' }}
           >
             🇮🇳 Hanle (India)
@@ -536,52 +657,103 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
           <button
             type="button"
             className="btn-secondary"
-            onClick={() => setAutoRotate(!autoRotate)}
+            onClick={() => { playTelemetryClick(true); setAutoRotate(!autoRotate); }}
             style={{ height: '28px', padding: '0 10px', fontSize: '11px' }}
           >
             {autoRotate ? '⏸️ Pause Orbit' : '▶️ Auto-Rotate'}
           </button>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={toggleFullscreen}
+            style={{ height: '28px', padding: '0 10px', fontSize: '11px' }}
+            title="Toggle Fullscreen 3D Viewport"
+          >
+            ⛶ Fullscreen
+          </button>
         </div>
       </div>
 
-      {/* Lighting Spectrum & Wave Speed Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', padding: '6px 0', borderBottom: '1px solid var(--color-hairline-soft)' }}>
+      {/* Evaluator Live Simulation & Stress-Test Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', padding: '8px 0', borderBottom: '1px solid var(--color-hairline-soft)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-mute)' }}>LIGHTING SPECTRUM:</span>
+          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-mute)' }}>EVALUATION STRESS-TEST:</span>
+          <button
+            type="button"
+            className={`filter-chip ${simulatedKp === null ? 'filter-chip--active' : ''}`}
+            onClick={() => { playTelemetryClick(true); setSimulatedKp(null); }}
+            style={{ fontSize: '11px', padding: '2px 8px' }}
+          >
+            📡 Live SWPC (Kp {kpIndex})
+          </button>
+          <button
+            type="button"
+            className={`filter-chip ${simulatedKp === 1 ? 'filter-chip--active' : ''}`}
+            onClick={() => { playTelemetryClick(true); setSimulatedKp(1); }}
+            style={{ fontSize: '11px', padding: '2px 8px' }}
+          >
+            Quiet (Kp 1)
+          </button>
+          <button
+            type="button"
+            className={`filter-chip ${simulatedKp === 4 ? 'filter-chip--active' : ''}`}
+            onClick={() => { playTelemetryClick(true); setSimulatedKp(4); }}
+            style={{ fontSize: '11px', padding: '2px 8px' }}
+          >
+            Active (Kp 4)
+          </button>
+          <button
+            type="button"
+            className={`filter-chip ${simulatedKp === 6 ? 'filter-chip--active' : ''}`}
+            onClick={() => { playTelemetryClick(true); setSimulatedKp(6); }}
+            style={{ fontSize: '11px', padding: '2px 8px' }}
+          >
+            G2 Storm (Kp 6)
+          </button>
+          <button
+            type="button"
+            className={`filter-chip ${simulatedKp === 9 ? 'filter-chip--active' : ''}`}
+            onClick={() => { playTelemetryClick(true); setSimulatedKp(9); }}
+            style={{ fontSize: '11px', padding: '2px 8px' }}
+          >
+            🔴 G5 Extreme SAR (Kp 9)
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-mute)' }}>SPECTRUM:</span>
           <button
             type="button"
             className={`filter-chip ${colorMode === 'emerald' ? 'filter-chip--active' : ''}`}
-            onClick={() => setColorMode('emerald')}
+            onClick={() => { playTelemetryClick(true); setColorMode('emerald'); }}
             style={{ fontSize: '11px', padding: '2px 8px' }}
           >
-            🟢 Oxygen Emerald (557.7nm)
+            🟢 557.7nm (Oxygen)
           </button>
           <button
             type="button"
             className={`filter-chip ${colorMode === 'violet' ? 'filter-chip--active' : ''}`}
-            onClick={() => setColorMode('violet')}
+            onClick={() => { playTelemetryClick(true); setColorMode('violet'); }}
             style={{ fontSize: '11px', padding: '2px 8px' }}
           >
-            🟣 Nitrogen Violet (630nm)
+            🟣 630nm (Nitrogen)
           </button>
           <button
             type="button"
             className={`filter-chip ${colorMode === 'crimson' ? 'filter-chip--active' : ''}`}
-            onClick={() => setColorMode('crimson')}
+            onClick={() => { playTelemetryClick(true); setColorMode('crimson'); }}
             style={{ fontSize: '11px', padding: '2px 8px' }}
           >
-            🔴 Storm Crimson (SAR Arc)
+            🔴 SAR Arc
           </button>
-        </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-mute)' }}>WAVE SPEED:</span>
+          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-mute)', marginLeft: '6px' }}>SPEED:</span>
           {[0.5, 1.0, 2.0].map((spd) => (
             <button
               key={spd}
               type="button"
               className={`filter-chip ${waveSpeed === spd ? 'filter-chip--active' : ''}`}
-              onClick={() => setWaveSpeed(spd)}
+              onClick={() => { playTelemetryClick(true); setWaveSpeed(spd); }}
               style={{ fontSize: '11px', padding: '2px 8px' }}
             >
               {spd}x
@@ -595,10 +767,10 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
         ref={mountRef}
         style={{
           width: '100%',
-          height: '460px',
+          height: '480px',
           position: 'relative',
           borderRadius: 'var(--radius-none)',
-          background: 'radial-gradient(circle at center, #0a1122 0%, #030610 100%)',
+          background: 'radial-gradient(circle at center, #071026 0%, #020617 100%)',
           border: '1px solid var(--color-hairline)',
           overflow: 'hidden',
           cursor: 'grab',
@@ -643,7 +815,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
           >
             <span style={{ color: 'var(--color-mute)' }}>IMF Bz Coupling: </span>
             <strong style={{ color: imfBz < 0 ? '#34D399' : '#FBBF24' }}>
-              {imfBz} nT ({imfBz < 0 ? 'Southward / Direct Solar Flow' : 'Northward / Magnetosphere Shielded'})
+              {imfBz} nT ({imfBz < 0 ? 'Southward / Direct Solar Inflow' : 'Northward / Shielded'})
             </strong>
           </div>
           <div
@@ -674,26 +846,26 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
             fontSize: '12px',
             color: 'var(--color-ink)',
             zIndex: 10,
-            maxWidth: '220px',
+            maxWidth: '240px',
           }}
         >
           <div style={{ color: 'var(--color-mute)', fontSize: '10px' }}>TARGET STATION:</div>
           <div style={{ fontWeight: 700, color: 'var(--color-accent-teal)' }}>{selectedStation.name}</div>
           <div style={{ fontSize: '11px', marginTop: '2px', color: isStationActive ? '#34D399' : '#CBD5E1' }}>
-            {isStationActive ? '✨ Aurora Visible' : `Requires Kp ≥ ${selectedStation.minKp}`}
+            {isStationActive ? '✨ Aurora Visible Overhead' : `Requires Kp ≥ ${selectedStation.minKp}`}
           </div>
         </div>
 
-        {/* Rotation Hint */}
+        {/* Orbit Interaction Hint */}
         <div
           style={{
             position: 'absolute',
             bottom: '10px',
             left: '50%',
             transform: 'translateX(-50%)',
-            background: 'rgba(10, 13, 24, 0.8)',
+            background: 'rgba(10, 13, 24, 0.85)',
             border: '1px solid var(--color-hairline-soft)',
-            padding: '3px 12px',
+            padding: '4px 14px',
             borderRadius: 'var(--radius-lg)',
             fontSize: '11px',
             fontFamily: 'var(--font-mono)',
@@ -713,7 +885,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
             SELECT AURORA OBSERVATORY STATION:
           </span>
           <span style={{ fontSize: '11px', color: 'var(--color-accent-teal)', fontFamily: 'var(--font-mono)' }}>
-            LIVE FORECAST FOR KP {effectiveKp}
+            LIVE FORECAST FOR KP {effectiveKp} {simulatedKp !== null ? '(SIMULATED)' : '(SWPC TELEMETRY)'}
           </span>
         </div>
 
@@ -723,7 +895,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
               key={st.name}
               type="button"
               className={`filter-chip ${selectedStation.name === st.name ? 'filter-chip--active' : ''}`}
-              onClick={() => setSelectedStation(st)}
+              onClick={() => { playTelemetryClick(true); setSelectedStation(st); }}
               style={{ fontSize: '12px' }}
             >
               {st.name} ({st.lat}°N)

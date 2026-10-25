@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import '../styles/components/navRail.css';
 import '../styles/components/keyboardShortcutOverlay.css';
 
@@ -112,6 +112,13 @@ const navItems = [
 
 export function NavRail({ alertCount = 0, onOpenShortcuts }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+
+  const isItemActive = (path, isNavActive) => {
+    if (isNavActive) return true;
+    if (path === '/space-weather' && location.pathname === '/aurora') return true;
+    return false;
+  };
 
   useEffect(() => {
     function handleKeyDown(e) {
@@ -201,7 +208,7 @@ export function NavRail({ alertCount = 0, onOpenShortcuts }) {
                   <NavLink
                     to={item.path}
                     className={({ isActive }) =>
-                      `nav-rail__link ${isActive ? 'nav-rail__link--active' : ''}`
+                      `nav-rail__link ${isItemActive(item.path, isActive) ? 'nav-rail__link--active' : ''}`
                     }
                     end={item.path === '/'}
                     onClick={handleLinkClick}
@@ -266,7 +273,7 @@ export function NavRail({ alertCount = 0, onOpenShortcuts }) {
               <NavLink
                 to={item.path}
                 className={({ isActive }) =>
-                  `nav-rail__link ${isActive ? 'nav-rail__link--active' : ''}`
+                  `nav-rail__link ${isItemActive(item.path, isActive) ? 'nav-rail__link--active' : ''}`
                 }
                 end={item.path === '/'}
               >

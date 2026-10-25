@@ -1,24 +1,42 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useSpaceWeather } from '../hooks/useSpaceWeather.js';
 import { InstrumentGauge } from '../components/InstrumentGauge.jsx';
 import { SkeletonPulse } from '../components/SkeletonPulse.jsx';
 import { SpaceWeatherTrendChart } from '../components/SpaceWeatherTrendChart.jsx';
 import { AuroraGlobe3D } from '../components/AuroraGlobe3D.jsx';
 import { Legend } from '../components/Legend.jsx';
+import { playTelemetryClick } from '../utils/soundSynthesizer.js';
 
 export function SpaceWeather({ defaultTab = '3d-aurora' }) {
+  const location = useLocation();
+  const isAuroraRoute = location.pathname === '/aurora';
+
   const spaceWeather = useSpaceWeather();
   const data = spaceWeather.data;
 
   // Active Sub-Tab: '3d-aurora' | 'k-index' | 'solar-wind'
-  const [activeTab, setActiveTab] = useState(defaultTab);
+  const [activeTab, setActiveTab] = useState(isAuroraRoute ? '3d-aurora' : defaultTab);
+
+  useEffect(() => {
+    if (location.pathname === '/aurora') {
+      setActiveTab('3d-aurora');
+    }
+  }, [location.pathname]);
+
+  function handleTabChange(tab) {
+    playTelemetryClick(true);
+    setActiveTab(tab);
+  }
 
   return (
     <div className="page-container">
       <header className="page-header">
         <h1 className="page-title">
-          Solar & Space Weather Station
-          <span className="page-title__tag">NOAA SWPC TELEMETRY</span>
+          {isAuroraRoute || activeTab === '3d-aurora' ? '3D Aurora & Space Weather Station' : 'Solar & Space Weather Station'}
+          <span className="page-title__tag">
+            {isAuroraRoute || activeTab === '3d-aurora' ? '3D ATMOSPHERIC LIGHTING & NOAA TELEMETRY' : 'NOAA SWPC TELEMETRY'}
+          </span>
         </h1>
         <p className="page-subtitle">
           Real-time planetary K-index, 3D WebGL Aurora Borealis visualizer, RTSW solar wind plasma, & IMF magnetosphere coupling
@@ -102,21 +120,21 @@ export function SpaceWeather({ defaultTab = '3d-aurora' }) {
           <button
             type="button"
             className={`filter-chip ${activeTab === '3d-aurora' ? 'filter-chip--active' : ''}`}
-            onClick={() => setActiveTab('3d-aurora')}
+            onClick={() => handleTabChange('3d-aurora')}
           >
             🌌 3D Aurora & Northern Lights
           </button>
           <button
             type="button"
             className={`filter-chip ${activeTab === 'k-index' ? 'filter-chip--active' : ''}`}
-            onClick={() => setActiveTab('k-index')}
+            onClick={() => handleTabChange('k-index')}
           >
             📊 24-Hour K-Index Profile
           </button>
           <button
             type="button"
             className={`filter-chip ${activeTab === 'solar-wind' ? 'filter-chip--active' : ''}`}
-            onClick={() => setActiveTab('solar-wind')}
+            onClick={() => handleTabChange('solar-wind')}
           >
             ⚡ Solar Wind & IMF Telemetry
           </button>
