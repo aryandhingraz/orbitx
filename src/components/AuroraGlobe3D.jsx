@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { COLOR_TOKENS } from '../utils/colorTokens.js';
-import { playTelemetryClick, playTelemetryPing } from '../utils/soundSynthesizer.js';
+import { playTelemetryClick, playTelemetryPing, toggleCosmicDrone } from '../utils/soundSynthesizer.js';
 import '../styles/components/canvasChart.css';
 
 const AURORA_STATIONS = [
@@ -127,8 +127,41 @@ function createProceduralEarthTexture() {
   return texture;
 }
 
+/**
+ * Creates a procedural vertical gradient alpha texture for ethereal wispy auroral curtains
+ */
+function createAuroraCurtainTexture(primaryHex = '#2dd4bf', crownHex = '#a855f7') {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+
+  // Vertical atmospheric gradient with soft fading top and bottom edges
+  const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  grad.addColorStop(0.0, 'rgba(0, 0, 0, 0)');
+  grad.addColorStop(0.18, crownHex);
+  grad.addColorStop(0.65, primaryHex);
+  grad.addColorStop(0.92, primaryHex);
+  grad.addColorStop(1.0, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Vertical fluted ray striations (simulates ionizing particles streaming down magnetic field lines)
+  for (let x = 0; x < canvas.width; x += 4) {
+    const alpha = 0.08 + Math.sin(x * 0.18) * 0.06;
+    ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+    ctx.fillRect(x, 0, 2, canvas.height);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  return texture;
+}
+
 export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 }) {
   const mountRef = useRef(null);
+  const targetRotationRef = useRef({ y: 0, x: 0, active: false });
   const [selectedStation, setSelectedStation] = useState(AURORA_STATIONS[0]);
   const [cameraView, setCameraView] = useState('northPole'); // 'northPole' | 'southPole' | 'perspective' | 'india'
   const [autoRotate, setAutoRotate] = useState(true);
@@ -136,6 +169,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
   const [waveSpeed, setWaveSpeed] = useState(1.0); // 0.5 | 1.0 | 2.0
   const [simulatedKp, setSimulatedKp] = useState(null); // null = use live telemetry, or number 0-9
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isAudioActive, setIsAudioActive] = useState(false);
 
   // Active Effective Kp (Live SWPC telemetry or interactive simulator override)
   const effectiveKp = simulatedKp !== null ? simulatedKp : Math.max(0, Math.min(9, kpIndex));
@@ -143,10 +177,32 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
   // Ovation Model Empirical Calculation:
   // Kp 0 -> Oval edge ~ 67°N
   // Kp 5 -> Oval edge ~ 53°N (Scotland / Alaska)
-  // Kp 9 -> Oval edge ~ 38°N (Hanle Dark Sky Reserve Ladakh / Mediterranean)
+  // Kp 9 -> Oval edge ~ 34°N (Hanle Dark Sky Reserve Ladakh / Mediterranean)
   const equatorwardLat = Math.max(34, Math.round(67 - effectiveKp * 3.4));
   const ovalRadiusDeg = 90 - equatorwardLat;
   const ovalRadiusRad = (ovalRadiusDeg * Math.PI) / 180;
+
+  function flyToStation(station) {
+    setSelectedStation(station);
+    playTelemetryClick(true);
+    // Calculate target rotations to center Earth on selected station
+    const targetY = -((station.lon + 90) * Math.PI) / 180;
+    const targetX = ((station.lat - 45) * Math.PI) / 180 * 0.45;
+    targetRotationRef.current = { y: targetY, x: targetX, active: true };
+  }
+
+  function toggleAudio() {
+    const nextState = !isAudioActive;
+    setIsAudioActive(nextState);
+    toggleCosmicDrone(nextState);
+  }
+
+  useEffect(() => {
+    return () => {
+      // Cleanup cosmic audio on unmount
+      toggleCosmicDrone(false);
+    };
+  }, []);
 
   useEffect(() => {
     const container = mountRef.current;
@@ -169,7 +225,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
     renderer.domElement.style.touchAction = 'none';
     container.appendChild(renderer.domElement);
 
-    // Deep Space Starfield Points (350 distant stars)
+    // Deep Space Starfield Points (380 distant stars)
     const starCount = 380;
     const starGeo = new THREE.BufferGeometry();
     const starPos = new Float32Array(starCount * 3);
@@ -214,6 +270,14 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
         ? 0xa855f7
         : 0x2dd4bf;
 
+    const primaryColorCss =
+      colorMode === 'crimson' || effectiveKp >= 7
+        ? '#f43f5e'
+        : colorMode === 'violet'
+        ? '#a855f7'
+        : '#2dd4bf';
+
+    const secondaryColorCss = isStormMode ? '#ec4899' : '#38bdf8';
     const secondaryAuroraHex = isStormMode ? 0xec4899 : 0x38bdf8;
 
     // Real 3D Northern Lights Illuminating Lights (Orbits over Arctic landmasses)
@@ -261,11 +325,14 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
     const ringRadius = Math.sin(ovalRadiusRad) * 1.05;
     const ringY = Math.cos(ovalRadiusRad) * 1.05;
 
-    // A. Main Undulating Aurora Curtain Ribbon (Emerald Oxygen 557.7nm)
+    // Procedural wispy curtain gradient texture
+    const curtainTexture = createAuroraCurtainTexture(primaryColorCss, secondaryColorCss);
+
+    // A. Main Undulating Aurora Curtain Ribbon (Oxygen 557.7nm)
     const ribbonGeo = new THREE.CylinderGeometry(
       ringRadius * 0.98,
       ringRadius * 1.05,
-      0.12 + effectiveKp * 0.022,
+      0.13 + effectiveKp * 0.024,
       segments,
       8,
       true
@@ -274,9 +341,10 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
     const originalPositions = posAttr.array.slice();
 
     const ribbonMat = new THREE.MeshBasicMaterial({
+      map: curtainTexture,
       color: primaryAuroraHex,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.88,
       side: THREE.DoubleSide,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
@@ -295,9 +363,10 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
       true
     );
     const crownMat = new THREE.MeshBasicMaterial({
+      map: curtainTexture,
       color: secondaryAuroraHex,
       transparent: true,
-      opacity: 0.65,
+      opacity: 0.7,
       side: THREE.DoubleSide,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
@@ -307,7 +376,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
     auroraGroup.add(crownMesh);
 
     // C. Vertical Ionized Auroral Ray Pillars (Tall fluted columns)
-    const rayPillarCount = 48;
+    const rayPillarCount = 52;
     const rayGeo = new THREE.BufferGeometry();
     const rayPositions = new Float32Array(rayPillarCount * 2 * 3);
     for (let i = 0; i < rayPillarCount; i++) {
@@ -315,7 +384,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
       const rBase = ringRadius * (1.0 + (Math.sin(i * 3) * 0.03));
       const rTop = rBase * 1.06;
       const yBase = ringY;
-      const yTop = ringY + 0.14 + effectiveKp * 0.02;
+      const yTop = ringY + 0.15 + effectiveKp * 0.022;
 
       // Base vertex
       rayPositions[i * 6] = rBase * Math.cos(angle);
@@ -331,7 +400,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
     const rayMat = new THREE.LineBasicMaterial({
       color: primaryAuroraHex,
       transparent: true,
-      opacity: 0.7,
+      opacity: 0.75,
       blending: THREE.AdditiveBlending,
     });
     const rayLines = new THREE.LineSegments(rayGeo, rayMat);
@@ -341,7 +410,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
     const southRibbonGeo = new THREE.CylinderGeometry(
       ringRadius * 1.05,
       ringRadius * 0.98,
-      0.11 + effectiveKp * 0.018,
+      0.12 + effectiveKp * 0.02,
       segments,
       6,
       true
@@ -350,8 +419,8 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
     southRibbonMesh.position.set(0, -ringY, 0);
     auroraGroup.add(southRibbonMesh);
 
-    // E. Ionospheric Shimmering Energy Particles (220 points)
-    const particleCount = 220;
+    // E. Ionospheric Shimmering Energy Particles (240 points)
+    const particleCount = 240;
     const particleGeo = new THREE.BufferGeometry();
     const particlePositions = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
@@ -364,9 +433,9 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
     particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
     const particleMat = new THREE.PointsMaterial({
       color: primaryAuroraHex,
-      size: 0.042,
+      size: 0.044,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.92,
       blending: THREE.AdditiveBlending,
     });
     const particles = new THREE.Points(particleGeo, particleMat);
@@ -428,6 +497,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
 
     function onPointerDown(e) {
       isDragging = true;
+      targetRotationRef.current.active = false;
       dragDist = 0;
       const clientX = e.clientX || e.touches?.[0]?.clientX || 0;
       const clientY = e.clientY || e.touches?.[0]?.clientY || 0;
@@ -461,7 +531,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(pinMeshes, false);
         if (intersects.length > 0 && intersects[0].object.userData?.name) {
-          setSelectedStation(intersects[0].object.userData);
+          flyToStation(intersects[0].object.userData);
           playTelemetryPing(true);
         }
       }
@@ -484,11 +554,21 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
       animId = requestAnimationFrame(animate);
       const time = clock.getElapsedTime() * waveSpeed;
 
+      // Smooth Station Fly-To Rotation Interpolation
+      if (targetRotationRef.current.active) {
+        const tr = targetRotationRef.current;
+        earthGroup.rotation.y += (tr.y - earthGroup.rotation.y) * 0.06;
+        earthGroup.rotation.x += (tr.x - earthGroup.rotation.x) * 0.06;
+        if (Math.abs(tr.y - earthGroup.rotation.y) < 0.005 && Math.abs(tr.x - earthGroup.rotation.x) < 0.005) {
+          tr.active = false;
+        }
+      }
+
       // Atmospheric Breathing Light Glow
-      const pulse = 0.7 + Math.sin(time * 2.5) * 0.16;
+      const pulse = 0.72 + Math.sin(time * 2.5) * 0.16;
       ribbonMat.opacity = pulse;
-      crownMat.opacity = pulse * 0.75;
-      rayMat.opacity = pulse * 0.8;
+      crownMat.opacity = pulse * 0.78;
+      rayMat.opacity = pulse * 0.85;
       auroraLight1.intensity = 2.4 + Math.sin(time * 3.0) * 0.9;
       auroraLight2.intensity = 1.8 + Math.cos(time * 2.2) * 0.7;
 
@@ -517,7 +597,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
       particles.rotation.y = time * 0.04;
       rayLines.rotation.y = -time * 0.02;
 
-      if (autoRotate && !isDragging) {
+      if (autoRotate && !isDragging && !targetRotationRef.current.active) {
         earthGroup.rotation.y += 0.0022;
       }
 
@@ -549,6 +629,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
       earthGeo.dispose();
       earthMat.dispose();
       earthTexture.dispose();
+      curtainTexture.dispose();
       atmosphereGeo.dispose();
       atmosphereMat.dispose();
       starGeo.dispose();
@@ -661,6 +742,15 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
             style={{ height: '28px', padding: '0 10px', fontSize: '11px' }}
           >
             {autoRotate ? '⏸️ Pause Orbit' : '▶️ Auto-Rotate'}
+          </button>
+          <button
+            type="button"
+            className={`btn-secondary ${isAudioActive ? 'filter-chip--active' : ''}`}
+            onClick={toggleAudio}
+            style={{ height: '28px', padding: '0 10px', fontSize: '11px' }}
+            title="Toggle Ethereal Cosmic Drone Audio"
+          >
+            {isAudioActive ? '🔊 Cosmic Audio' : '🔇 Audio Off'}
           </button>
           <button
             type="button"
@@ -895,7 +985,7 @@ export function AuroraGlobe3D({ kpIndex = 2, imfBz = -2.8, solarWindSpeed = 450 
               key={st.name}
               type="button"
               className={`filter-chip ${selectedStation.name === st.name ? 'filter-chip--active' : ''}`}
-              onClick={() => { playTelemetryClick(true); setSelectedStation(st); }}
+              onClick={() => flyToStation(st)}
               style={{ fontSize: '12px' }}
             >
               {st.name} ({st.lat}°N)

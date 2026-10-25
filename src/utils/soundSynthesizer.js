@@ -105,3 +105,46 @@ export function playAlertBeep(enabled = true) {
     // Silently ignore
   }
 }
+
+
+let ambientOsc = null;
+let ambientGain = null;
+
+/**
+ * Ambient Cosmic Drone Synthesizer (§14)
+ * Generates an ethereal harmonic sub-bass drone for the 3D Aurora Station
+ */
+export function toggleCosmicDrone(enable = false) {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return false;
+    if (!enable) {
+      if (ambientGain) {
+        ambientGain.gain.setValueAtTime(ambientGain.gain.value, ctx.currentTime);
+        ambientGain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+        setTimeout(() => {
+          try {
+            ambientOsc?.stop();
+            ambientOsc?.disconnect();
+          } catch {}
+          ambientOsc = null;
+          ambientGain = null;
+        }, 400);
+      }
+      return false;
+    }
+    if (ambientOsc) return true;
+    ambientOsc = ctx.createOscillator();
+    ambientGain = ctx.createGain();
+    ambientOsc.type = 'sine';
+    ambientOsc.frequency.setValueAtTime(108, ctx.currentTime);
+    ambientGain.gain.setValueAtTime(0.001, ctx.currentTime);
+    ambientGain.gain.exponentialRampToValueAtTime(0.035, ctx.currentTime + 0.8);
+    ambientOsc.connect(ambientGain);
+    ambientGain.connect(ctx.destination);
+    ambientOsc.start();
+    return true;
+  } catch {
+    return false;
+  }
+}
