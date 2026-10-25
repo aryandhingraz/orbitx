@@ -34,10 +34,12 @@ export function useSpaceWeather() {
       try {
         const kIndexUrl = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json';
         const windUrl = 'https://services.swpc.noaa.gov/json/rtsw/rtsw_wind_1m.json';
+        const magUrl = 'https://services.swpc.noaa.gov/json/rtsw/rtsw_mag_1m.json';
 
-        const [kRes, wRes] = await Promise.allSettled([
+        const [kRes, wRes, mRes] = await Promise.allSettled([
           fetchWithRetry(kIndexUrl, { signal: controller.signal }, 2, 500, 'NOAA SWPC 24h K-Index'),
           fetchWithRetry(windUrl, { signal: controller.signal }, 2, 500, 'NOAA Solar Wind API'),
+          fetchWithRetry(magUrl, { signal: controller.signal }, 2, 500, 'NOAA RTSW Magnetometer API'),
         ]);
 
         let kIndexVal = 2; // Default nominal
@@ -91,8 +93,32 @@ export function useSpaceWeather() {
           isEstimated = true;
         }
 
+        // Parse NOAA SWPC real RTSW magnetometer telemetry (Bz & Bt)
+        let realBz = -2.8;
+        let realBt = 4.5;
+        if (mRes.status === 'fulfilled' && mRes.value.ok) {
+          const magData = await mRes.value.json();
+          if (Array.isArray(magData) && magData.length > 0) {
+            for (let i = magData.length - 1; i >= 0; i--) {
+              const row = magData[i];
+              if (row && row.bz_gsm != null) {
+                const bzVal = parseFloat(row.bz_gsm);
+                const btVal = parseFloat(row.bt);
+                if (!isNaN(bzVal)) {
+                  realBz = Math.round(bzVal * 10) / 10;
+                  realBt = !isNaN(btVal) ? Math.round(btVal * 10) / 10 : 4.5;
+                  break;
+                }
+              }
+            }
+          }
+        }
+
         const kStatus = kIndexVal >= 5 ? 'alert' : kIndexVal >= 4 ? 'warning' : 'nominal';
         const auroraLikelihood = kIndexVal >= 6 ? 'High (Geomagnetic Storm)' : kIndexVal >= 4 ? 'Moderate' : 'Low';
+        const gScale = kIndexVal >= 9 ? 'G5' : kIndexVal >= 8 ? 'G4' : kIndexVal >= 7 ? 'G3' : kIndexVal >= 6 ? 'G2' : kIndexVal >= 5 ? 'G1' : 'G0';
+        const auroraMinLat = Math.max(38, Math.round(66 - kIndexVal * 3.2));
+        const auroraPowerGW = Math.round(15 + Math.pow(kIndexVal, 2.1) * 3);
 
         const transformed = {
           kpIndex: kIndexVal,
@@ -100,6 +126,12 @@ export function useSpaceWeather() {
           kHistory,
           solarWindSpeed: realSpeed,
           solarWindDensity: realDensity,
+          imfBz: realBz,
+          imfBt: realBt,
+          bzDirection: realBz < 0 ? 'Southward (Open Magnetic Gateway)' : 'Northward (Shielded)',
+          gScale,
+          auroraMinLat,
+          auroraPowerGW,
           auroraLikelihood,
           isEstimated,
         };
@@ -122,6 +154,12 @@ export function useSpaceWeather() {
               kHistory: DEFAULT_K_HISTORY,
               solarWindSpeed: 420,
               solarWindDensity: '5.2',
+              imfBz: -2.8,
+              imfBt: 4.5,
+              bzDirection: 'Southward (Open Magnetic Gateway)',
+              gScale: 'G0',
+              auroraMinLat: 60,
+              auroraPowerGW: 28,
               auroraLikelihood: 'Low',
               isEstimated: true,
             },

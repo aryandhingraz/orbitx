@@ -67,7 +67,7 @@ export function KeyboardShortcutOverlay({ isOpen, onClose, onToggle }) {
     { label: '2. Compare — City Comparator', path: '/compare' },
     { label: '3. Satellites — ISS Tracking', path: '/satellites' },
     { label: '4. Alerts — Command Center', path: '/alerts' },
-    { label: '5. Space Weather — SWPC Station', path: '/space-weather' },
+    { label: '5. Space Weather & 3D Aurora Station', path: '/space-weather' },
     { label: '6. Earth Watch — Disaster News', path: '/earth-watch' },
     { label: '7. Journal — Telemetry Ledger', path: '/journal' },
     { label: '8. Settings — Instrument Config', path: '/settings' },

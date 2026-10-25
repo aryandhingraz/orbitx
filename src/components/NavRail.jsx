@@ -59,7 +59,7 @@ const navItems = [
   },
   {
     path: '/space-weather',
-    label: 'Space Weather',
+    label: 'Aurora & Space',
     icon: (
       <svg className="nav-rail__icon" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.75" fill="none" />

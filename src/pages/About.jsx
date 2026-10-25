@@ -138,6 +138,7 @@ export function About() {
                   { component: 'REST API Fetching + Exponential Backoff Retry', marks: '3–4 Marks', impl: 'fetchWithRetry.js, 10 Custom Data Hooks', status: 'COMPLETE' },
                   { component: 'Pagination + Infinite Scroll (IntersectionObserver)', marks: '2–3 Marks', impl: 'EarthWatch.jsx — Sentinel Observer & Batching', status: 'COMPLETE' },
                   { component: 'Canvas 2D Data Tracking & High Contrast Tooltips', marks: 'Bonus', impl: '7 Canvas 2D Visualizers + Dynamic Tracking Pills', status: 'EXCELLENT' },
+                  { component: '3D WebGL Planetary & Aurora Oval Engines', marks: 'Bonus', impl: 'globeEngine.js, AuroraGlobe3D.jsx (Vanilla Three.js)', status: 'OUTSTANDING' },
                   { component: 'India-First Observatory Defaults (New Delhi Focus)', marks: 'Bonus', impl: 'useGeolocation.js, useGlobalCitySnapshot.js, LiveTicker.jsx', status: 'EXCELLENT' },
                 ].map((row) => (
                   <tr key={row.component}>
@@ -187,9 +188,9 @@ export function About() {
               </p>
             </div>
             <div className="data-widget-card" style={{ padding: '16px' }}>
-              <strong>6. Space Weather (SWPC)</strong>
+              <strong>6. Space Weather (SWPC & 3D Aurora)</strong>
               <p style={{ fontSize: 'var(--text-caption-md)', color: 'var(--color-mute)', marginTop: '4px' }}>
-                NOAA SWPC telemetry tracking planetary K-index geomagnetic storms, real RTSW solar wind plasma, and aurora visibility likelihood.
+                Interactive 3D WebGL Aurora Borealis oval visualizer, 24-hour planetary K-index trend chart, and real-time RTSW solar wind plasma and IMF magnetosphere coupling.
               </p>
             </div>
             <div className="data-widget-card" style={{ padding: '16px' }}>

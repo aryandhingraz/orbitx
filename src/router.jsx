@@ -32,7 +32,8 @@ export function AppRouter() {
       </Route>
       
       <Route path="/alerts" element={<Alerts />} />
-      <Route path="/space-weather" element={<SpaceWeather />} />
+      <Route path="/space-weather" element={<SpaceWeather defaultTab="3d-aurora" />} />
+      <Route path="/aurora" element={<SpaceWeather defaultTab="3d-aurora" />} />
       <Route path="/earth-watch" element={<EarthWatch />} />
       
       {/* Protected Route for Journal (§2.3 Lectures 37-42) */}
