@@ -26,7 +26,7 @@ export function exportSnapshotAsImage(entry) {
   ctx.fillStyle = '#A9A38F';
   ctx.font = '16px IBM Plex Mono';
   ctx.fillText(`Timestamp: ${new Date(entry.timestamp).toLocaleString()}`, 50, 105);
-  ctx.fillText(`Station: ${entry.location || 'Greenwich Observatory'}`, 50, 130);
+  ctx.fillText(`Station: ${entry.location || 'New Delhi Observatory'}`, 50, 130);
 
   // Divider Line
   ctx.strokeStyle = 'rgba(201, 162, 39, 0.3)';

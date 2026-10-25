@@ -31,7 +31,7 @@ export function SolarRatioChart({ dayLengthSec = 45180 }) {
     ctx.stroke();
 
     // Daylight Arc (Accent Teal)
-    ctx.strokeStyle = COLOR_TOKENS.accentTeal.hexStr;
+    ctx.strokeStyle = '#2DD4BF';
     ctx.lineWidth = 24;
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + dayAngle);
@@ -41,13 +41,13 @@ export function SolarRatioChart({ dayLengthSec = 45180 }) {
     const dayHours = (dayLengthSec / 3600).toFixed(1);
     const nightHours = ((86400 - dayLengthSec) / 3600).toFixed(1);
 
-    ctx.fillStyle = COLOR_TOKENS.ink.hexStr;
-    ctx.font = '700 32px Space Grotesk';
+    ctx.fillStyle = '#F8FAFC';
+    ctx.font = '700 32px Space Grotesk, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(`${dayHours} hrs`, centerX, centerY - 5);
 
-    ctx.fillStyle = COLOR_TOKENS.mute.hexStr;
-    ctx.font = '20px IBM Plex Mono';
+    ctx.fillStyle = '#CBD5E1';
+    ctx.font = '600 20px IBM Plex Mono, monospace';
     ctx.fillText(`Daylight / ${nightHours}h Night`, centerX, centerY + 30);
   }, [dayLengthSec]);
 

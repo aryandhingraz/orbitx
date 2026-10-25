@@ -32,9 +32,9 @@ export function InstrumentGauge({
       className={`instrument-gauge instrument-gauge--${status} ${isStale ? 'instrument-gauge--stale' : ''} ${isFlashing ? 'instrument-gauge--flash' : ''}`}
       title={fullText}
     >
-      <span className="instrument-gauge__label text-truncate" title={label}>{label}</span>
+      <span className="instrument-gauge__label" title={label}>{label}</span>
       <div className="instrument-gauge__value-wrap min-w-0">
-        <span className="instrument-gauge__value text-truncate">
+        <span className="instrument-gauge__value">
           {displayValue}
           {unit && <span className="instrument-gauge__unit"> {unit}</span>}
         </span>

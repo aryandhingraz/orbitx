@@ -9,10 +9,27 @@
   flex-direction: column;
   gap: var(--space-xl);
   max-width: 1080px;
+  width: 100%;
   box-shadow: none;
   font-family: var(--font-body);
   line-height: 1.6;
   min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+@media (max-width: 1023px) {
+  .about-article {
+    padding: var(--space-lg);
+    gap: var(--space-lg);
+  }
+}
+
+@media (max-width: 639px) {
+  .about-article {
+    padding: var(--space-md);
+    gap: var(--space-md);
+  }
 }
 
 .about-section-title {
@@ -25,6 +42,8 @@
   border-bottom: 1px solid var(--color-hairline);
   padding-bottom: var(--space-xs);
   margin-bottom: var(--space-md);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .about-highlight-box {
@@ -36,11 +55,26 @@
   font-family: var(--font-mono);
   font-size: var(--text-caption-md);
   color: var(--color-ink);
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+@media (max-width: 639px) {
+  .about-highlight-box {
+    padding: var(--space-md);
+    font-size: var(--text-caption-sm);
+  }
+}
+
+.about-rubric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: var(--space-md);
 }
 
 .about-api-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: var(--space-md);
   margin-top: var(--space-xs);
 }
@@ -52,6 +86,16 @@
   padding: var(--space-md);
   font-family: var(--font-body);
   font-size: var(--text-caption-md);
+  color: var(--color-ink);
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.about-stations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: var(--space-md);
+  margin-top: var(--space-md);
 }
 
 /* 4-Column Footer Pattern (§2.4) */
@@ -66,8 +110,8 @@
 
 .about-footer__columns {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-xl);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: var(--space-lg);
 }
 
 .about-footer__col-title {
@@ -77,6 +121,7 @@
   color: var(--color-ink);
   text-transform: uppercase;
   margin-bottom: var(--space-sm);
+  overflow-wrap: break-word;
 }
 
 .about-footer__col-list {
@@ -86,6 +131,8 @@
   gap: 6px;
   font-size: var(--text-caption-sm);
   color: var(--color-mute);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .about-footer__fineprint {
@@ -99,4 +146,6 @@
   font-family: var(--font-mono);
   font-size: var(--text-utility-xs);
   color: var(--color-mute);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }

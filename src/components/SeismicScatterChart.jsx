@@ -78,29 +78,47 @@ export function SeismicScatterChart({ quakes = [] }) {
       const depth = Math.min(300, Math.max(0, activeQuake.coordinates?.[2] || 10));
 
       const x = padding + (mag / 8) * chartW;
-      const boxW = 320;
-      const boxH = 90;
-      let boxX = x + 20;
-      if (boxX + boxW > width - 20) boxX = x - boxW - 20;
-      const boxY = padding + 10;
+      const magStr = `Magnitude: M ${activeQuake.mag.toFixed(1)}`;
+      const placeStr = `Location: ${activeQuake.place || 'Unknown'}`;
+      const depthStr = `Depth: ${depth.toFixed(1)} km`;
 
-      ctx.fillStyle = 'rgba(17, 17, 17, 0.95)';
-      ctx.strokeStyle = COLOR_TOKENS.sale.hexStr;
+      ctx.font = '700 20px Space Grotesk, sans-serif';
+      const wMag = ctx.measureText(magStr).width;
+      ctx.font = '600 18px IBM Plex Mono, monospace';
+      const wPlace = ctx.measureText(placeStr).width;
+      const wDepth = ctx.measureText(depthStr).width;
+
+      const boxW = Math.max(wMag, wPlace, wDepth, 280) + 36;
+      const boxH = 96;
+
+      let boxX = x + 20;
+      if (boxX + boxW > width - 16) {
+        boxX = x - boxW - 20;
+      }
+      if (boxX < 16) boxX = 16;
+
+      let boxY = padding + 10;
+      if (boxY + boxH > height - 16) {
+        boxY = height - boxH - 16;
+      }
+
+      ctx.fillStyle = 'rgba(10, 13, 24, 0.96)';
+      ctx.strokeStyle = '#EF4444';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.roundRect(boxX, boxY, boxW, boxH, 8);
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = COLOR_TOKENS.sale.hexStr;
-      ctx.font = '700 20px Space Grotesk';
+      ctx.fillStyle = '#FCA5A5';
+      ctx.font = '700 20px Space Grotesk, sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText(`Magnitude M ${activeQuake.mag.toFixed(1)}`, boxX + 16, boxY + 30);
+      ctx.fillText(magStr, boxX + 18, boxY + 28);
 
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = '18px IBM Plex Mono';
-      ctx.fillText(`Location: ${activeQuake.place || 'Unknown'}`, boxX + 16, boxY + 56);
-      ctx.fillText(`Depth: ${depth.toFixed(1)} km`, boxX + 16, boxY + 78);
+      ctx.font = '600 18px IBM Plex Mono, monospace';
+      ctx.fillText(placeStr, boxX + 18, boxY + 56);
+      ctx.fillText(depthStr, boxX + 18, boxY + 82);
     }
   }, [quakes, activeQuake]);
 
@@ -151,8 +169,9 @@ export function SeismicScatterChart({ quakes = [] }) {
           <span className="chart-card__subtitle">👆 Move cursor / touch over dots to inspect epicenter details</span>
         </div>
         {activeQuake && (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--color-sale)' }}>
-            M {activeQuake.mag} • {activeQuake.place}
+          <span className="chart-tracking-pill">
+            <span className="chart-tracking-dot" style={{ backgroundColor: '#EF4444' }}></span>
+            TRACKING: M {activeQuake.mag} • {activeQuake.place}
           </span>
         )}
       </div>
@@ -162,8 +181,10 @@ export function SeismicScatterChart({ quakes = [] }) {
           className="chart-canvas"
           style={{ cursor: 'crosshair' }}
           onMouseMove={handlePointerMove}
+          onTouchStart={handlePointerMove}
           onTouchMove={handlePointerMove}
           onMouseLeave={() => setActiveQuake(null)}
+          onTouchEnd={() => setActiveQuake(null)}
         />
       </div>
     </div>

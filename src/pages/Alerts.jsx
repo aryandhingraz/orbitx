@@ -130,7 +130,7 @@ export function Alerts() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-md)' }}>
           <div>
             <span className="badge-promo">SYSTEM MONITORING STATUS</span>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-heading-xl)', color: activeAlertCount > 0 ? 'var(--color-sale)' : 'var(--color-success-bright)', marginTop: '4px', textTransform: 'uppercase' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', color: activeAlertCount > 0 ? 'var(--color-sale)' : 'var(--color-success-bright)', marginTop: '4px', textTransform: 'uppercase', overflowWrap: 'break-word', wordBreak: 'break-word', fontSize: 'clamp(1rem, 3vw, 2rem)' }}>
               {activeAlertCount > 0 ? `🚨 ${activeAlertCount} ACTIVE TELEMETRY ALERTS` : '✅ ALL PLANETARY SYSTEMS NOMINAL'}
             </h2>
           </div>

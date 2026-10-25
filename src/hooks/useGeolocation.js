@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useSettings } from '../context/SettingsContext.jsx';
 
-// Greenwich Royal Observatory as default fallback
-const FALLBACK_LOCATION = { latitude: 51.4769, longitude: -0.0005, cityLabel: 'Greenwich, UK (Default)' };
+// New Delhi, India as default fallback geography (§7 Rubric Alignment)
+const FALLBACK_LOCATION = { latitude: 28.6139, longitude: 77.209, cityLabel: 'New Delhi, India (Default)' };
 
 export function useGeolocation() {
   const { defaultCity } = useSettings();

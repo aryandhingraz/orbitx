@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { showToast } from '../store/uiSlice.js';
+import { ValidatedField } from '../components/ValidatedField.jsx';
 import { useGeolocation } from '../hooks/useGeolocation.js';
 import { useWeather } from '../hooks/useWeather.js';
 import { useAirQuality } from '../hooks/useAirQuality.js';
@@ -15,7 +18,18 @@ const JOURNAL_KEY = 'orbitx-journal';
 
 const TAG_OPTIONS = ['Climate Record', 'Seismic Alert', 'Solar Event', 'ISS Sighting', 'Animal Behavior Note'];
 
+function validateNote(val) {
+  if (!val || val.trim().length === 0) {
+    return 'Observation note cannot be empty.';
+  }
+  if (val.trim().length < 3) {
+    return 'Observation note must be at least 3 characters.';
+  }
+  return null;
+}
+
 export function Journal() {
+  const dispatch = useDispatch();
   const { units } = useSettings();
   const geo = useGeolocation();
   const weather = useWeather(geo.data?.latitude, geo.data?.longitude);
@@ -25,8 +39,10 @@ export function Journal() {
   const sunMoon = useSunAndMoon(geo.data?.latitude, geo.data?.longitude);
 
   const [noteInput, setNoteInput] = useState('');
+  const [forceNoteError, setForceNoteError] = useState(false);
   const [selectedTag, setSelectedTag] = useState('Climate Record');
   const [activeFilter, setActiveFilter] = useState('All');
+  const [confirmClear, setConfirmClear] = useState(false);
 
   const [entries, setEntries] = useState(() => {
     try {
@@ -46,11 +62,19 @@ export function Journal() {
   }, [entries]);
 
   function handlePinCurrentSnapshot() {
+    const error = validateNote(noteInput);
+    if (error) {
+      setForceNoteError(true);
+      dispatch(showToast({ message: error, type: 'sale' }));
+      return;
+    }
+    setForceNoteError(false);
+
     const newEntry = {
       id: Date.now(),
       timestamp: Date.now(),
       tag: selectedTag,
-      note: noteInput.trim() || 'Routine observation note',
+      note: noteInput.trim(),
       location: geo.data?.cityLabel || 'Local Observatory',
       coordinates: formatCoordinate(geo.data?.latitude, geo.data?.longitude),
       temp: formatTemperature(weather.data?.temperature, units),
@@ -63,20 +87,28 @@ export function Journal() {
 
     setEntries((prev) => [newEntry, ...prev]);
     setNoteInput('');
+    dispatch(showToast({ message: 'Journal observation log recorded successfully!', type: 'success' }));
   }
 
   function handleClearJournal() {
-    if (window.confirm('Are you sure you want to clear all journal entries?')) {
-      setEntries([]);
+    if (!confirmClear) {
+      setConfirmClear(true);
+      setTimeout(() => setConfirmClear(false), 4000);
+      return;
     }
+    setEntries([]);
+    setConfirmClear(false);
+    dispatch(showToast({ message: 'All journal entries cleared.', type: 'info' }));
   }
 
   function handleDeleteEntry(id) {
     setEntries((prev) => prev.filter((e) => e.id !== id));
+    dispatch(showToast({ message: 'Journal entry removed.', type: 'info' }));
   }
 
   function handleJSONExport() {
     exportDataAsJSON(entries, `orbitx-journal-backup-${Date.now()}.json`);
+    dispatch(showToast({ message: 'Journal backup exported as JSON.', type: 'success' }));
   }
 
   function handleJSONImport(e) {
@@ -84,11 +116,11 @@ export function Journal() {
     if (!file) return;
     importDataFromJSON(file, (err, importedData) => {
       if (err || !Array.isArray(importedData)) {
-        alert('Invalid JSON journal backup file.');
+        dispatch(showToast({ message: 'Invalid JSON journal backup file.', type: 'sale' }));
         return;
       }
       setEntries(importedData);
-      alert(`Successfully restored ${importedData.length} journal logs!`);
+      dispatch(showToast({ message: `Successfully restored ${importedData.length} journal logs!`, type: 'success' }));
     });
   }
 
@@ -135,14 +167,19 @@ export function Journal() {
               ))}
             </select>
 
-            <input
-              type="text"
-              className="search-pill"
-              placeholder="Add your note (e.g. Unusual pressure drop, clear night sky, bright ISS pass)..."
-              value={noteInput}
-              onChange={(e) => setNoteInput(e.target.value)}
-              style={{ flex: 1, minWidth: '240px' }}
-            />
+            <div style={{ flex: 1, minWidth: '260px' }}>
+              <ValidatedField
+                value={noteInput}
+                onChange={(e) => {
+                  setNoteInput(e.target.value);
+                  if (forceNoteError) setForceNoteError(false);
+                }}
+                validate={validateNote}
+                forceShowError={forceNoteError}
+                placeholder="Add your note (e.g. Unusual pressure drop, clear night sky, bright ISS pass)..."
+                aria-label="Observation note input"
+              />
+            </div>
 
             <button type="button" className="btn-primary" onClick={handlePinCurrentSnapshot}>
               Save Today's Entry
@@ -180,8 +217,21 @@ export function Journal() {
             <input type="file" accept=".json" onChange={handleJSONImport} style={{ display: 'none' }} />
           </label>
           {entries.length > 0 && (
-            <button type="button" className="btn-secondary" onClick={handleClearJournal} style={{ height: '40px', padding: '0 16px', fontSize: 'var(--text-caption-md)', color: 'var(--color-sale)', borderColor: 'var(--color-sale)' }}>
-              CLEAR ALL
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={handleClearJournal}
+              style={{
+                height: '40px',
+                padding: '0 16px',
+                fontSize: 'var(--text-caption-md)',
+                color: confirmClear ? '#FFFFFF' : 'var(--color-sale)',
+                backgroundColor: confirmClear ? 'var(--color-sale)' : 'transparent',
+                borderColor: 'var(--color-sale)',
+                transition: 'all 150ms ease',
+              }}
+            >
+              {confirmClear ? '⚠️ TAP AGAIN TO CONFIRM CLEAR' : 'CLEAR ALL'}
             </button>
           )}
         </div>

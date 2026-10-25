@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSettings } from '../context/SettingsContext.jsx';
+import { fetchWithRetry } from '../utils/fetchWithRetry.js';
 
 const POLL_MS = { live: 10 * 60 * 1000, balanced: 15 * 60 * 1000, 'battery-saver': 30 * 60 * 1000 };
 
@@ -25,8 +26,7 @@ export function useAirQuality(rawLat, rawLon) {
       controller = new AbortController();
       try {
         const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,european_aqi,pm10,pm2_5,carbon_monoxide,nitrogen_dioxide&hourly=us_aqi&forecast_days=1`;
-        const res = await fetch(url, { signal: controller.signal });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const res = await fetchWithRetry(url, { signal: controller.signal }, 2, 500, 'Air Quality API');
         const json = await res.json();
 
         const usAqi = json.current.us_aqi ?? 25;

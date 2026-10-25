@@ -2,7 +2,7 @@
 
 .instrument-strip {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
   gap: var(--space-md);
   width: 100%;
   min-width: 0;
@@ -10,7 +10,7 @@
 
 @media (max-width: 639px) {
   .instrument-strip {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
     gap: var(--space-sm);
   }
 }

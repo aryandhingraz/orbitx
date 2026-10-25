@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { fetchWithRetry } from '../utils/fetchWithRetry.js';
 
 const POLL_MS = 10 * 60 * 1000; // 10 minutes
 
@@ -52,8 +53,7 @@ export function useNaturalEvents() {
       controller = new AbortController();
       try {
         const url = 'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=30';
-        const res = await fetch(url, { signal: controller.signal });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const res = await fetchWithRetry(url, { signal: controller.signal }, 2, 500, 'NASA EONET Events API');
         const json = await res.json();
 
         if (!cancelled && json.events && Array.isArray(json.events)) {

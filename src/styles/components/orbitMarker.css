@@ -59,3 +59,11 @@
   white-space: nowrap;
   pointer-events: none;
 }
+
+@media (max-width: 639px) {
+  .orbit-marker-label {
+    font-size: 8px;
+    padding: 1px 5px;
+    top: 24px;
+  }
+}

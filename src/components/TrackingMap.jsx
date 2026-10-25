@@ -62,31 +62,63 @@ export function TrackingMap({ issLat = 28.5, issLon = -84.2, issAlt = 418, issVe
     const px = ((issLon + 180) / 360) * width;
     const py = ((90 - issLat) / 180) * height;
 
-    ctx.strokeStyle = COLOR_TOKENS.accentTeal.hexStr;
-    ctx.lineWidth = 3;
+    // Glowing ISS marker
+    ctx.strokeStyle = '#2DD4BF';
+    ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.arc(px, py, 18, 0, Math.PI * 2);
+    ctx.arc(px, py, 20, 0, Math.PI * 2);
     ctx.stroke();
 
-    ctx.fillStyle = COLOR_TOKENS.accentTeal.hexStr;
+    ctx.fillStyle = '#2DD4BF';
     ctx.beginPath();
-    ctx.arc(px, py, 8, 0, Math.PI * 2);
+    ctx.arc(px, py, 9, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = COLOR_TOKENS.ink.hexStr;
-    ctx.strokeStyle = COLOR_TOKENS.hairline.hexStr;
-    ctx.lineWidth = 1;
-    ctx.fillRect(px + 14, py - 26, 180, 52);
-    ctx.strokeRect(px + 14, py - 26, 180, 52);
+    // Telemetry text strings
+    const titleStr = 'ISS (NORAD 25544) • LIVE';
+    const latStr = `${Math.abs(issLat).toFixed(2)}°${issLat >= 0 ? 'N' : 'S'}`;
+    const lonStr = `${Math.abs(issLon).toFixed(2)}°${issLon >= 0 ? 'E' : 'W'}`;
+    const telemStr = `${latStr}, ${lonStr} • Alt: ${issAlt}km • Vel: ${issVel.toLocaleString()}km/h`;
 
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 16px Inter';
-    ctx.fillText(`ISS (NORAD 25544)`, px + 22, py - 8);
+    ctx.font = '700 22px Space Grotesk, sans-serif';
+    const wTitle = ctx.measureText(titleStr).width;
+    ctx.font = '600 20px IBM Plex Mono, monospace';
+    const wTelem = ctx.measureText(telemStr).width;
 
-    ctx.fillStyle = COLOR_TOKENS.mute.hexStr;
-    ctx.font = '14px IBM Plex Mono';
-    ctx.fillText(`${issLat.toFixed(1)}°, ${issLon.toFixed(1)}° | ${issAlt}km`, px + 22, py + 14);
+    const boxW = Math.max(wTitle, wTelem) + 36;
+    const boxH = 80;
+
+    let boxX = px + 24;
+    if (boxX + boxW > width - 16) {
+      boxX = px - boxW - 24;
+    }
+    if (boxX < 16) boxX = 16;
+
+    let boxY = py - boxH / 2;
+    if (boxY < 16) boxY = 16;
+    if (boxY + boxH > height - 16) boxY = height - boxH - 16;
+
+    // Rounded background box with high contrast
+    ctx.fillStyle = 'rgba(10, 13, 24, 0.96)';
+    ctx.strokeStyle = '#2DD4BF';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(boxX, boxY, boxW, boxH, 8);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#F8FAFC';
+    ctx.font = '700 22px Space Grotesk, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(titleStr, boxX + 18, boxY + 30);
+
+    ctx.fillStyle = '#2DD4BF';
+    ctx.font = '600 20px IBM Plex Mono, monospace';
+    ctx.fillText(telemStr, boxX + 18, boxY + 62);
   }, [issLat, issLon, issAlt, issVel]);
+
+  const latDisplay = `${Math.abs(issLat).toFixed(2)}°${issLat >= 0 ? 'N' : 'S'}`;
+  const lonDisplay = `${Math.abs(issLon).toFixed(2)}°${issLon >= 0 ? 'E' : 'W'}`;
 
   return (
     <div className="chart-card">
@@ -95,8 +127,9 @@ export function TrackingMap({ issLat = 28.5, issLon = -84.2, issAlt = 418, issVe
           <h2 className="chart-card__title">Live 2D ISS Tracking Map (Equirectangular)</h2>
           <span className="chart-card__subtitle">5-Second Live Satellite Coordinates & Orbital Path</span>
         </div>
-        <span className="badge-promo" style={{ color: 'var(--color-accent-teal)', borderColor: 'var(--color-accent-teal)' }}>
-          ● LIVE ORBITAL TRACK
+        <span className="chart-tracking-pill">
+          <span className="chart-tracking-dot"></span>
+          TRACKING: {latDisplay}, {lonDisplay} | {issAlt}km
         </span>
       </div>
       <div className="chart-canvas-container" style={{ height: '320px' }}>

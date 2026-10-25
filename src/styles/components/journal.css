@@ -26,6 +26,14 @@
   position: relative;
   box-shadow: none;
   min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+@media (max-width: 639px) {
+  .timeline-card {
+    padding: var(--space-md);
+  }
 }
 
 .timeline-card__header {
@@ -54,7 +62,7 @@
 
 .timeline-card__data-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
   gap: var(--space-sm);
   font-family: var(--font-mono);
   font-size: var(--text-caption-sm);

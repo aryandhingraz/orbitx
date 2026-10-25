@@ -1,4 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { addCity, removeCity } from '../store/compareCitiesSlice.js';
+import { showToast } from '../store/uiSlice.js';
 import { useGeocodingSearch } from '../hooks/useGeocodingSearch.js';
 import { useMultiCityTelemetry } from '../hooks/useMultiCityTelemetry.js';
 import { CompareCityCard } from '../components/CompareCityCard.jsx';
@@ -7,54 +10,35 @@ import { Legend } from '../components/Legend.jsx';
 import { RADAR_CITY_COLORS } from '../utils/colorTokens.js';
 import '../styles/components/compare.css';
 
-const DEFAULT_CITIES = [
-  { id: 1, name: 'London', country: 'United Kingdom', latitude: 51.5074, longitude: -0.1278 },
-  { id: 2, name: 'Tokyo', country: 'Japan', latitude: 35.6762, longitude: 139.6503 },
-  { id: 3, name: 'New York', country: 'United States', latitude: 40.7128, longitude: -74.006 },
-  { id: 4, name: 'Sydney', country: 'Australia', latitude: -33.8688, longitude: 151.2093 },
-];
-
-const COMPARE_KEY = 'orbitx-compare-cities';
-
 export function Compare() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [cities, setCities] = useState(() => {
-    try {
-      const saved = localStorage.getItem(COMPARE_KEY);
-      return saved ? JSON.parse(saved) : DEFAULT_CITIES;
-    } catch {
-      return DEFAULT_CITIES;
-    }
-  });
+  const cities = useSelector((state) => state.compareCities.cities);
+  const dispatch = useDispatch();
 
   const [viewMode, setViewMode] = useState('gauges'); // 'gauges' | 'table'
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(COMPARE_KEY, JSON.stringify(cities));
-    } catch {
-      // ignore
-    }
-  }, [cities]);
 
   const { results, isLoading } = useGeocodingSearch(searchTerm);
   const multiTelemetry = useMultiCityTelemetry(cities);
 
   function handleSelectCity(city) {
     if (cities.length >= 4) {
-      alert('Maximum of 4 cities can be compared simultaneously.');
+      dispatch(showToast({ message: 'Maximum of 4 cities can be compared simultaneously.', type: 'sale' }));
       return;
     }
     if (cities.some((c) => c.name.toLowerCase() === city.name.toLowerCase())) {
+      dispatch(showToast({ message: `${city.name} is already in comparison matrix.`, type: 'info' }));
       setSearchTerm('');
       return;
     }
-    setCities((prev) => [...prev, city]);
+    dispatch(addCity(city));
+    dispatch(showToast({ message: `${city.name} added to comparison matrix.`, type: 'success' }));
     setSearchTerm('');
   }
 
   function handleRemoveCity(id) {
-    setCities((prev) => prev.filter((c) => c.id !== id));
+    const target = cities.find((c) => c.id === id);
+    dispatch(removeCity(id));
+    dispatch(showToast({ message: `${target?.name || 'City'} removed from comparison.`, type: 'info' }));
   }
 
   const radarData = cities.map((c) => {
@@ -103,15 +87,43 @@ export function Compare() {
             <input
               type="text"
               className="search-pill"
-              placeholder="Search city to add for comparison (e.g. Paris, Cairo, New Delhi)..."
+              placeholder="Search city to add for comparison (e.g. New Delhi, Mumbai, Bengaluru, London)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               aria-label="Search city name for comparison"
             />
           </div>
 
+          {/* Quick Preset Cities to Add (§7 India-First) */}
+          {cities.length < 4 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
+              <span style={{ fontSize: 'var(--text-caption-sm)', color: 'var(--color-mute)' }}>Quick Add:</span>
+              {[
+                { name: 'New Delhi', country: 'India', latitude: 28.6139, longitude: 77.209 },
+                { name: 'Mumbai', country: 'India', latitude: 19.0760, longitude: 72.8777 },
+                { name: 'Bengaluru', country: 'India', latitude: 12.9716, longitude: 77.5946 },
+                { name: 'Kolkata', country: 'India', latitude: 22.5726, longitude: 88.3639 },
+                { name: 'London', country: 'United Kingdom', latitude: 51.5074, longitude: -0.1278 },
+                { name: 'Tokyo', country: 'Japan', latitude: 35.6762, longitude: 139.6503 },
+              ]
+                .filter((p) => !cities.some((c) => c.name.toLowerCase() === p.name.toLowerCase()))
+                .slice(0, 4)
+                .map((preset) => (
+                  <button
+                    key={preset.name}
+                    type="button"
+                    className="filter-chip"
+                    style={{ fontSize: '11px', padding: '3px 10px' }}
+                    onClick={() => handleSelectCity(preset)}
+                  >
+                    + {preset.name}
+                  </button>
+                ))}
+            </div>
+          )}
+
           {searchTerm.trim().length >= 2 && (
-            <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: 'var(--color-canvas)', border: '1px solid var(--color-hairline)', borderRadius: 'var(--radius-none)', zIndex: 50 }}>
+            <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: 'var(--color-canvas)', border: '1px solid var(--color-hairline)', borderRadius: 'var(--radius-none)', zIndex: 50, maxHeight: '300px', overflowY: 'auto' }}>
               {isLoading ? (
                 <div style={{ padding: '12px 16px', color: 'var(--color-mute)' }}>Searching telemetry database...</div>
               ) : results.length === 0 ? (

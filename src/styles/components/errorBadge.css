@@ -12,7 +12,9 @@
   font-family: var(--font-body);
   font-size: var(--text-caption-sm);
   font-weight: 500;
-  white-space: nowrap;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .error-badge__retry-btn {

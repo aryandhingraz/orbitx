@@ -70,6 +70,6 @@
 
 @media (max-width: 639px) {
   .orbit-system-container {
-    max-width: 360px;
+    max-width: min(340px, calc(100vw - 32px));
   }
 }

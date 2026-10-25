@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSettings } from '../context/SettingsContext.jsx';
 import { celsiusToFahrenheit, kmhToMph } from '../utils/unitConversion.js';
+import { fetchWithRetry } from '../utils/fetchWithRetry.js';
 
 const POLL_MS = { live: 5 * 60 * 1000, balanced: 10 * 60 * 1000, 'battery-saver': 30 * 60 * 1000 };
 
@@ -26,8 +27,7 @@ export function useWeather(rawLat, rawLon) {
       controller = new AbortController();
       try {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,surface_pressure&hourly=relative_humidity_2m,surface_pressure&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto`;
-        const res = await fetch(url, { signal: controller.signal });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const res = await fetchWithRetry(url, { signal: controller.signal }, 2, 500, 'Weather API');
         const json = await res.json();
 
         const currentTempC = json.current.temperature_2m;

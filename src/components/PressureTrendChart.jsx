@@ -88,6 +88,47 @@ export function PressureTrendChart({ hourlyPressure = [] }) {
       ctx.arc(sx, sy, 8, 0, Math.PI * 2);
       ctx.fillStyle = COLOR_TOKENS.info.hexStr;
       ctx.fill();
+
+      // Floating in-canvas tooltip for pressure
+      const timeStr = `Time: ${activeIndex.toString().padStart(2, '0')}:00`;
+      const pressVal = data[activeIndex] || 1013;
+      const pressStr = `Pressure: ${pressVal} hPa`;
+
+      ctx.font = '700 20px Space Grotesk, sans-serif';
+      const wTime = ctx.measureText(timeStr).width;
+      ctx.font = '600 20px IBM Plex Mono, monospace';
+      const wPress = ctx.measureText(pressStr).width;
+
+      const boxW = Math.max(wTime, wPress, 200) + 36;
+      const boxH = 80;
+
+      let boxX = sx + 20;
+      if (boxX + boxW > width - 16) {
+        boxX = sx - boxW - 20;
+      }
+      if (boxX < 16) boxX = 16;
+
+      let boxY = padding + 10;
+      if (boxY + boxH > height - 16) {
+        boxY = height - boxH - 16;
+      }
+
+      ctx.fillStyle = 'rgba(10, 13, 24, 0.96)';
+      ctx.strokeStyle = '#3B82F6';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(boxX, boxY, boxW, boxH, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#F8FAFC';
+      ctx.font = '700 20px Space Grotesk, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(timeStr, boxX + 18, boxY + 30);
+
+      ctx.fillStyle = '#93C5FD';
+      ctx.font = '600 20px IBM Plex Mono, monospace';
+      ctx.fillText(pressStr, boxX + 18, boxY + 60);
     }
   }, [hourlyPressure, activeIndex]);
 
@@ -95,11 +136,11 @@ export function PressureTrendChart({ hourlyPressure = [] }) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
+    const clientX = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
     const padding = 35;
     const chartW = rect.width - padding * 2;
     const count = hourlyPressure.length || 24;
-    const idx = Math.max(0, Math.min(count - 1, Math.round(((x - padding) / chartW) * (count - 1))));
+    const idx = Math.max(0, Math.min(count - 1, Math.round(((clientX - padding) / chartW) * (count - 1))));
     setActiveIndex(idx);
   }
 
@@ -111,8 +152,9 @@ export function PressureTrendChart({ hourlyPressure = [] }) {
           <span className="chart-card__subtitle">👆 Drag cursor / touch across graph to inspect hourly hPa readout</span>
         </div>
         {activeIndex !== null && (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-caption-md)', color: 'var(--color-accent-teal)', fontWeight: 600 }}>
-            {activeIndex}:00 → {hourlyPressure[activeIndex] || 1013} hPa
+          <span className="chart-tracking-pill">
+            <span className="chart-tracking-dot"></span>
+            TRACKING: {activeIndex.toString().padStart(2, '0')}:00 → {hourlyPressure[activeIndex] || 1013} hPa
           </span>
         )}
       </div>
@@ -123,6 +165,9 @@ export function PressureTrendChart({ hourlyPressure = [] }) {
           style={{ cursor: 'crosshair' }}
           onMouseMove={handlePointerMove}
           onMouseLeave={() => setActiveIndex(null)}
+          onTouchStart={(e) => handlePointerMove(e)}
+          onTouchMove={(e) => handlePointerMove(e)}
+          onTouchEnd={() => setActiveIndex(null)}
         />
       </div>
     </div>

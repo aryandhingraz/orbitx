@@ -120,6 +120,17 @@
   }
 }
 
+@media (max-width: 360px) {
+  .page-container {
+    padding: var(--space-lg) var(--space-sm);
+    gap: var(--space-4);
+    padding-bottom: 50px;
+  }
+  .page-title {
+    font-size: 1.5rem;
+  }
+}
+
 /* Print Stylesheet (§14) */
 @media print {
   .nav-rail, .mobile-header-bar, .nav-drawer-backdrop, .starfield, .globe-wrapper, .orbit-ring-system, .live-ticker, .shortcut-badge-trigger {

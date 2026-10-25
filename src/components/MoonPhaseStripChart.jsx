@@ -41,7 +41,7 @@ export function MoonPhaseStripChart() {
 
       // Illuminated Crescent / Gibbous Shape (Accent Teal)
       const illum = item.phase.illuminationPercent / 100;
-      ctx.fillStyle = COLOR_TOKENS.accentTeal.hexStr;
+      ctx.fillStyle = '#2DD4BF';
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, -Math.PI / 2, Math.PI / 2, illum > 0.5);
       ctx.ellipse(centerX, centerY, Math.abs(radius * (1 - 2 * illum)), radius, 0, Math.PI / 2, -Math.PI / 2, illum < 0.5);
@@ -49,13 +49,13 @@ export function MoonPhaseStripChart() {
 
       // Date & Phase Label
       const dayStr = i === 0 ? 'Today' : item.date.toLocaleDateString([], { weekday: 'short' });
-      ctx.fillStyle = COLOR_TOKENS.ink.hexStr;
-      ctx.font = '20px Space Grotesk';
+      ctx.fillStyle = '#F8FAFC';
+      ctx.font = '600 20px Space Grotesk, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(dayStr, centerX, height - 35);
 
-      ctx.fillStyle = COLOR_TOKENS.mute.hexStr;
-      ctx.font = '16px IBM Plex Mono';
+      ctx.fillStyle = '#CBD5E1';
+      ctx.font = '600 16px IBM Plex Mono, monospace';
       ctx.fillText(`${item.phase.illuminationPercent}%`, centerX, height - 12);
     });
   }, []);

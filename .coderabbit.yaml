@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/coderabbit-overrides.v2.json
+version: "2"
+language: "en-US"
+tone_instructions: "Strict, comprehensive frontend engineering evaluator reviewing against syllabus lectures 1-72 and PBE-II rubrics"
+reviews:
+  profile: "assertive"
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - "main"
+chat:
+  auto_reply: true
+knowledge_base:
+  guidelines:
+    - "Strictly verify BECSE (AIFT) Batch 2025 Front End Engineering-II Project-Based Evaluation (PBE-II) rubrics."
+    - "Only one sanctioned external dependency addition: @reduxjs/toolkit and react-redux. No other npm packages."
+    - "Semantic HTML5, hand-written CSS3 (no CSS frameworks), vanilla ES6+ JS, React 18, React Router v6, Context API, and Three.js strictly isolated in src/globe/globeEngine.js."
+    - "Responsive design from 320px to 1440px without any text clipping, ellipsis truncation of data, or box overflow."
+    - "India-first default geography (New Delhi observatory station 28.6139°N, 77.2090°E)."
+    - "Ensure all canvas chart scrubbers have interactive hover and touch tracking with high-contrast text and dynamic measurement."

@@ -55,7 +55,7 @@ export function PlateBoundaryMap({ quakes = [] }) {
     const getX = (lon) => ((lon + 180) / 360) * width;
     const getY = (lat) => ((90 - lat) / 180) * height;
 
-    ctx.strokeStyle = 'rgba(10, 114, 129, 0.75)';
+    ctx.strokeStyle = 'rgba(45, 212, 191, 0.75)';
     ctx.lineWidth = 3;
     ctx.setLineDash([8, 6]);
 
@@ -83,7 +83,7 @@ export function PlateBoundaryMap({ quakes = [] }) {
       const px = getX(q.lon);
       const py = getY(q.lat);
       const radius = q.mag >= 5.0 ? 10 : q.mag >= 4.0 ? 7 : 4;
-      const color = q.mag >= 5.0 ? COLOR_TOKENS.sale.hexStr : q.mag >= 4.0 ? COLOR_TOKENS.info.hexStr : COLOR_TOKENS.success.hexStr;
+      const color = q.mag >= 5.0 ? '#EF4444' : q.mag >= 4.0 ? '#60A5FA' : '#34D399';
 
       ctx.fillStyle = `${color}44`;
       ctx.beginPath();

@@ -97,16 +97,19 @@ export function KeyboardShortcutOverlay({ isOpen, onClose, onToggle }) {
         {/* City Search Results */}
         {geocode.results.length > 0 && (
           <div style={{ background: 'var(--color-canvas)', border: '1px solid var(--color-hairline)' }}>
-            {geocode.results.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                style={{ width: '100%', padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid var(--color-hairline-soft)', color: 'var(--color-ink)', cursor: 'pointer', background: 'transparent' }}
-                onClick={() => handleJump('/explore', { selectedCity: c })}
-              >
-                <strong>{c.name}</strong>, {c.country} ({c.latitude.toFixed(1)}°, {c.longitude.toFixed(1)}°)
-              </button>
-            ))}
+            {geocode.results.map((c) => {
+              const slug = c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  style={{ width: '100%', padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid var(--color-hairline-soft)', color: 'var(--color-ink)', cursor: 'pointer', background: 'transparent' }}
+                  onClick={() => handleJump(`/explore/${slug}`, { selectedCity: c })}
+                >
+                  <strong>{c.name}</strong>, {c.country} ({c.latitude.toFixed(1)}°, {c.longitude.toFixed(1)}°)
+                </button>
+              );
+            })}
           </div>
         )}
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSettings } from '../context/SettingsContext.jsx';
+import { fetchWithRetry } from '../utils/fetchWithRetry.js';
 
 const POLL_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -24,8 +25,8 @@ export function useSpaceWeather() {
         const windUrl = 'https://services.swpc.noaa.gov/json/rtsw/rtsw_wind_1m.json';
 
         const [kRes, wRes] = await Promise.allSettled([
-          fetch(kIndexUrl, { signal: controller.signal }),
-          fetch(windUrl, { signal: controller.signal }),
+          fetchWithRetry(kIndexUrl, { signal: controller.signal }, 2, 500, 'NOAA SWPC K-Index'),
+          fetchWithRetry(windUrl, { signal: controller.signal }, 2, 500, 'NOAA Solar Wind API'),
         ]);
 
         let kIndexVal = 2; // Default nominal

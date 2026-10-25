@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { addCity } from '../store/compareCitiesSlice.js';
+import { showToast } from '../store/uiSlice.js';
 import { useGeolocation } from '../hooks/useGeolocation.js';
 import { useWeather } from '../hooks/useWeather.js';
 import { useAirQuality } from '../hooks/useAirQuality.js';
@@ -7,6 +10,7 @@ import { useQuakes } from '../hooks/useQuakes.js';
 import { useSunAndMoon } from '../hooks/useSunAndMoon.js';
 import { useGeocodingSearch } from '../hooks/useGeocodingSearch.js';
 import { useSettings } from '../context/SettingsContext.jsx';
+import { fetchWithRetry } from '../utils/fetchWithRetry.js';
 
 import { TempTrendChart } from '../components/TempTrendChart.jsx';
 import { AqiTrendChart } from '../components/AqiTrendChart.jsx';
@@ -20,34 +24,77 @@ import { SkeletonPulse } from '../components/SkeletonPulse.jsx';
 import { Legend } from '../components/Legend.jsx';
 
 const DEFAULT_CITIES = [
-  { name: 'Greenwich Observatory', latitude: 51.4769, longitude: -0.0005 },
-  { name: 'Tokyo', latitude: 35.6762, longitude: 139.6503 },
-  { name: 'New York', latitude: 40.7128, longitude: -74.0060 },
-  { name: 'Sydney', latitude: -33.8688, longitude: 151.2093 },
-  { name: 'Cairo', latitude: 30.0444, longitude: 31.2357 },
+  { name: 'New Delhi', latitude: 28.6139, longitude: 77.209, country: 'India', slug: 'new-delhi' },
+  { name: 'Mumbai', latitude: 19.0760, longitude: 72.8777, country: 'India', slug: 'mumbai' },
+  { name: 'Bengaluru', latitude: 12.9716, longitude: 77.5946, country: 'India', slug: 'bengaluru' },
+  { name: 'Kolkata', latitude: 22.5726, longitude: 88.3639, country: 'India', slug: 'kolkata' },
+  { name: 'Chennai', latitude: 13.0827, longitude: 80.2707, country: 'India', slug: 'chennai' },
+  { name: 'Hyderabad', latitude: 17.3850, longitude: 78.4867, country: 'India', slug: 'hyderabad' },
+  { name: 'London', latitude: 51.5074, longitude: -0.1278, country: 'United Kingdom', slug: 'london' },
+  { name: 'Tokyo', latitude: 35.6762, longitude: 139.6503, country: 'Japan', slug: 'tokyo' },
+  { name: 'New York', latitude: 40.7128, longitude: -74.0060, country: 'United States', slug: 'new-york' },
+  { name: 'Sydney', latitude: -33.8688, longitude: 151.2093, country: 'Australia', slug: 'sydney' },
+  { name: 'Cairo', latitude: 30.0444, longitude: 31.2357, country: 'Egypt', slug: 'cairo' },
 ];
 
-const COMPARE_KEY = 'orbitx-compare-cities';
-
 export function Explore() {
+  const dispatch = useDispatch();
   const { units } = useSettings();
   const geo = useGeolocation();
   const location = useLocation();
   const navigate = useNavigate();
+  const { citySlug } = useParams();
 
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeChartTab, setActiveChartTab] = useState('temp'); // 'temp' | 'aqi' | 'pressure' | 'humidity'
 
+  // Dynamic Route & State Resolver (§2.1 Lectures 37-42)
   useEffect(() => {
     if (location.state?.selectedCity) {
       setSelectedLocation(location.state.selectedCity);
+      return;
     }
-  }, [location.state]);
+
+    if (citySlug) {
+      const normalized = citySlug.toLowerCase();
+      const matched = DEFAULT_CITIES.find(
+        (c) => c.slug === normalized || c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === normalized
+      );
+      if (matched) {
+        setSelectedLocation(matched);
+      } else {
+        // Deep-link dynamic resolution via Geocoding API
+        const cleanName = citySlug.replace(/-/g, ' ');
+        fetchWithRetry(
+          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cleanName)}&count=1&language=en&format=json`,
+          {},
+          2,
+          500,
+          'City Deep-Link Lookup'
+        )
+          .then((res) => res.json())
+          .then((json) => {
+            if (json.results && json.results[0]) {
+              const r = json.results[0];
+              setSelectedLocation({
+                name: r.name,
+                country: r.country,
+                latitude: r.latitude,
+                longitude: r.longitude,
+              });
+            }
+          })
+          .catch((err) => {
+            console.warn('Could not resolve route param city:', err);
+          });
+      }
+    }
+  }, [citySlug, location.state]);
 
   const activeLat = selectedLocation?.latitude ?? geo.data?.latitude;
   const activeLon = selectedLocation?.longitude ?? geo.data?.longitude;
-  const activeLabel = selectedLocation?.name ?? geo.data?.cityLabel ?? 'Greenwich Observatory';
+  const activeLabel = selectedLocation?.name ?? geo.data?.cityLabel ?? 'New Delhi, India (Default)';
 
   const geocode = useGeocodingSearch(searchQuery);
 
@@ -59,20 +106,14 @@ export function Explore() {
   function handleSelectCity(city) {
     setSelectedLocation(city);
     setSearchQuery('');
+    const slug = city.slug || city.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    navigate(`/explore/${slug}`, { state: { selectedCity: city }, replace: true });
   }
 
   function handlePinToCompare(city) {
-    try {
-      const saved = localStorage.getItem(COMPARE_KEY);
-      const currentList = saved ? JSON.parse(saved) : DEFAULT_CITIES;
-      if (!currentList.some((c) => c.name.toLowerCase() === city.name.toLowerCase())) {
-        const updated = [...currentList, city];
-        localStorage.setItem(COMPARE_KEY, JSON.stringify(updated));
-      }
-      navigate('/compare');
-    } catch {
-      navigate('/compare');
-    }
+    dispatch(addCity(city));
+    dispatch(showToast({ message: `${city.name} pinned to comparison matrix!`, type: 'success' }));
+    navigate('/compare');
   }
 
   // Dynamic Chart Legend Items (§2.2 Item 9)
@@ -232,7 +273,7 @@ export function Explore() {
       </section>
 
       {/* 4 Secondary Telemetry Analytics Canvas Charts with Dedicated Legends (§2.3) */}
-      <div className="explore-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 'var(--space-xl)' }}>
+      <div className="explore-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 'var(--space-xl)' }}>
         <div>
           <QuakeDistChart quakes={quakes.data?.quakes || []} />
           <div style={{ marginTop: 'var(--space-xs)' }}>

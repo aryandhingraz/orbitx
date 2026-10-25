@@ -17,7 +17,7 @@ export function RadarChart({ citiesData = [] }) {
 
     const centerX = width / 2;
     const centerY = height / 2;
-    const radius = Math.min(width, height) / 2 - 50;
+    const radius = Math.min(width, height) / 2 - 60;
 
     const axes = ['Temp', 'Air Quality', 'Wind Speed', 'Pressure', 'Humidity'];
     const totalAxes = axes.length;
@@ -49,16 +49,18 @@ export function RadarChart({ citiesData = [] }) {
       ctx.lineTo(x, y);
       ctx.stroke();
 
-      const labelX = centerX + (radius + 24) * Math.cos(angle);
-      const labelY = centerY + (radius + 24) * Math.sin(angle);
-      ctx.fillStyle = COLOR_TOKENS.mute.hexStr;
-      ctx.font = '18px Inter';
+      const labelX = Math.max(50, Math.min(width - 50, centerX + (radius + 28) * Math.cos(angle)));
+      const labelY = Math.max(20, Math.min(height - 20, centerY + (radius + 28) * Math.sin(angle)));
+      ctx.fillStyle = '#CBD5E1';
+      ctx.font = '600 18px Space Grotesk, sans-serif';
       ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
       ctx.fillText(label, labelX, labelY);
     });
 
     citiesData.forEach((city, cityIdx) => {
-      const color = RADAR_CITY_COLORS[cityIdx % RADAR_CITY_COLORS.length];
+      const colorToken = RADAR_CITY_COLORS[cityIdx % RADAR_CITY_COLORS.length];
+      const hex = colorToken?.hexStr || '#2DD4BF';
       const values = city.normalizedValues || [0.5, 0.5, 0.5, 0.5, 0.5];
 
       ctx.beginPath();
@@ -72,10 +74,10 @@ export function RadarChart({ citiesData = [] }) {
       });
       ctx.closePath();
 
-      ctx.fillStyle = `${color}22`;
+      ctx.fillStyle = `${hex}33`;
       ctx.fill();
 
-      ctx.strokeStyle = color;
+      ctx.strokeStyle = hex;
       ctx.lineWidth = 3;
       ctx.stroke();
     });

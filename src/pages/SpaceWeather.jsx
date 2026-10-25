@@ -84,7 +84,7 @@ export function SpaceWeather() {
       <SpaceWeatherTrendChart kHistory={data?.kHistory || []} />
 
       {/* Solar Physics Reference Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'var(--space-xl)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 'var(--space-xl)' }}>
         <div className="data-widget-card">
           <span className="instrument-gauge__label">Geomagnetic K-Index Scale Rationale</span>
           <p style={{ fontSize: 'var(--text-caption-md)', color: 'var(--color-mute)', marginTop: '8px' }}>

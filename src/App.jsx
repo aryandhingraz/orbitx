@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { HashRouter } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { store } from './store/store.js';
 import { SettingsProvider } from './context/SettingsContext.jsx';
 import { TelemetryProvider } from './context/TelemetryContext.jsx';
 import { AppRouter } from './router.jsx';
@@ -8,6 +10,7 @@ import { NavRail } from './components/NavRail.jsx';
 import { OfflineBanner } from './components/OfflineBanner.jsx';
 import { LiveTicker } from './components/LiveTicker.jsx';
 import { KeyboardShortcutOverlay } from './components/KeyboardShortcutOverlay.jsx';
+import { ToastStack } from './components/ToastStack.jsx';
 
 import { useGeolocation } from './hooks/useGeolocation.js';
 import { useWeather } from './hooks/useWeather.js';
@@ -62,6 +65,7 @@ function ShellContent() {
           onClose={() => setShowShortcuts(false)}
           onToggle={toggleShortcuts}
         />
+        <ToastStack />
       </div>
     </TelemetryProvider>
   );
@@ -69,12 +73,14 @@ function ShellContent() {
 
 export default function App() {
   return (
-    <SettingsProvider>
-      <HashRouter>
-        <Starfield />
-        <OfflineBanner />
-        <ShellContent />
-      </HashRouter>
-    </SettingsProvider>
+    <Provider store={store}>
+      <SettingsProvider>
+        <HashRouter>
+          <Starfield />
+          <OfflineBanner />
+          <ShellContent />
+        </HashRouter>
+      </SettingsProvider>
+    </Provider>
   );
 }

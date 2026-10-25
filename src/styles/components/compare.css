@@ -8,7 +8,7 @@
 
 .compare-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: var(--space-xl);
   width: 100%;
   min-width: 0;
@@ -25,6 +25,14 @@
   position: relative;
   box-shadow: none;
   min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+@media (max-width: 639px) {
+  .compare-card {
+    padding: var(--space-md);
+  }
 }
 
 .compare-card__header {

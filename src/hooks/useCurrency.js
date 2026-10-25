@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { fetchWithRetry } from '../utils/fetchWithRetry.js';
 
 const FALLBACK_RATES = { EUR: 0.92, GBP: 0.79, JPY: 154.2, CAD: 1.36, INR: 83.9, AUD: 1.52 };
 
@@ -27,8 +28,7 @@ export function useCurrency(baseCurrency = 'USD') {
       controller = new AbortController();
       try {
         const url = `https://open.er-api.com/v6/latest/${baseCurrency}`;
-        const res = await fetch(url, { signal: controller.signal });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const res = await fetchWithRetry(url, { signal: controller.signal }, 2, 500, 'Currency Exchange API');
         const json = await res.json();
 
         if (!cancelled && json.rates) {

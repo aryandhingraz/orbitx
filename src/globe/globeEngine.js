@@ -203,7 +203,11 @@ export function initGlobeEngine(container, activeLayer = 'overview', telemetryDa
       });
     } else if (layer === 'aqi') {
       const cityList = data?.citySnapshots?.length ? data.citySnapshots : [
+        { name: 'New Delhi', lat: 28.61, lon: 77.21, aqi: 120, category: 'Moderate', statusObj: COLOR_TOKENS.info },
+        { name: 'Mumbai', lat: 19.08, lon: 72.88, aqi: 75, category: 'Moderate', statusObj: COLOR_TOKENS.info },
+        { name: 'Bengaluru', lat: 12.97, lon: 77.59, aqi: 45, category: 'Good', statusObj: COLOR_TOKENS.success },
         { name: 'London', lat: 51.5, lon: -0.1, aqi: 28, category: 'Good', statusObj: COLOR_TOKENS.success },
+        { name: 'Tokyo', lat: 35.68, lon: 139.65, aqi: 35, category: 'Good', statusObj: COLOR_TOKENS.success },
         { name: 'New York', lat: 40.7, lon: -74.0, aqi: 42, category: 'Good', statusObj: COLOR_TOKENS.success },
       ];
       cityList.forEach((c) => {
@@ -245,7 +249,11 @@ export function initGlobeEngine(container, activeLayer = 'overview', telemetryDa
       layerGroup.add(issPin);
     } else if (layer === 'weather') {
       const cityList = data?.citySnapshots?.length ? data.citySnapshots : [
+        { name: 'New Delhi', lat: 28.61, lon: 77.21, temp: 26, windSpeed: 10, pressure: 1012, statusObj: COLOR_TOKENS.success },
+        { name: 'Mumbai', lat: 19.08, lon: 72.88, temp: 29, windSpeed: 14, pressure: 1011, statusObj: COLOR_TOKENS.success },
+        { name: 'Bengaluru', lat: 12.97, lon: 77.59, temp: 22, windSpeed: 11, pressure: 1014, statusObj: COLOR_TOKENS.success },
         { name: 'London', lat: 51.5, lon: -0.1, temp: 18, windSpeed: 12, pressure: 1013, statusObj: COLOR_TOKENS.success },
+        { name: 'Tokyo', lat: 35.68, lon: 139.65, temp: 20, windSpeed: 13, pressure: 1015, statusObj: COLOR_TOKENS.success },
         { name: 'New York', lat: 40.7, lon: -74.0, temp: 24, windSpeed: 15, pressure: 1016, statusObj: COLOR_TOKENS.info },
       ];
       cityList.forEach((c) => {
@@ -267,12 +275,18 @@ export function initGlobeEngine(container, activeLayer = 'overview', telemetryDa
       });
     } else {
       const defaultCities = [
+        { name: 'New Delhi', lat: 28.61, lon: 77.21 },
+        { name: 'Mumbai', lat: 19.08, lon: 72.88 },
+        { name: 'Bengaluru', lat: 12.97, lon: 77.59 },
+        { name: 'Kolkata', lat: 22.57, lon: 88.36 },
+        { name: 'Chennai', lat: 13.08, lon: 80.27 },
+        { name: 'Hyderabad', lat: 17.39, lon: 78.49 },
         { name: 'London', lat: 51.5, lon: -0.1 },
+        { name: 'Tokyo', lat: 35.68, lon: 139.65 },
         { name: 'New York', lat: 40.7, lon: -74.0 },
-        { name: 'Tokyo', lat: 35.6, lon: 139.6 },
         { name: 'Sydney', lat: -33.8, lon: 151.2 },
-        { name: 'New Delhi', lat: 28.6, lon: 77.2 },
         { name: 'Cairo', lat: 30.0, lon: 31.2 },
+        { name: 'Paris', lat: 48.86, lon: 2.35 },
       ];
       const pinGeo = new THREE.SphereGeometry(0.02, 16, 16);
       const pinMat = new THREE.MeshBasicMaterial({ color: COLOR_TOKENS.accentTeal.threeHex });

@@ -50,8 +50,8 @@ export function SpaceWeatherTrendChart({ kHistory = [] }) {
       ctx.fillStyle = color;
       ctx.fillRect(x - 12, y, 24, height - padding - y);
 
-      ctx.fillStyle = COLOR_TOKENS.ink.hexStr;
-      ctx.font = 'bold 16px IBM Plex Mono';
+      ctx.fillStyle = '#F8FAFC';
+      ctx.font = '600 18px IBM Plex Mono, monospace';
       ctx.textAlign = 'center';
       ctx.fillText(`Kp${val}`, x, y - 8);
     });

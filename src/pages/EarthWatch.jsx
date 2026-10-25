@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNaturalEvents } from '../hooks/useNaturalEvents.js';
 import { useQuakes } from '../hooks/useQuakes.js';
 import { useGeolocation } from '../hooks/useGeolocation.js';
@@ -27,6 +27,8 @@ export function EarthWatch() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [fieldNotes, setFieldNotes] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(10);
+  const sentinelRef = useRef(null);
 
   useEffect(() => {
     try {
@@ -52,6 +54,27 @@ export function EarthWatch() {
     return true;
   });
 
+  // Reset pagination on category change (Lectures 67-72 Pagination / Infinite Scroll)
+  useEffect(() => {
+    setVisibleCount(10);
+  }, [activeCategory]);
+
+  // Infinite Scroll Sentinel Observer
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => Math.min(prev + 10, filteredEvents.length));
+        }
+      },
+      { rootMargin: '100px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [filteredEvents.length]);
+
   return (
     <div className="page-container">
       <header className="page-header">
@@ -72,7 +95,7 @@ export function EarthWatch() {
               <span className="swatch-dot" style={{ backgroundColor: 'var(--color-sale)' }}></span>
               <span className="badge-promo">EARTH OBSERVATORY MONITOR</span>
             </div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-heading-xl)', color: 'var(--color-ink)', marginTop: '4px', textTransform: 'uppercase' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1rem, 3vw, 2rem)', color: 'var(--color-ink)', marginTop: '4px', textTransform: 'uppercase', overflowWrap: 'break-word', wordBreak: 'break-word' }}>
               🌎 {eventsList.length} ACTIVE NATURAL EVENTS & {quakesList.length} 24H SEISMIC EVENTS
             </h2>
           </div>
@@ -114,36 +137,52 @@ export function EarthWatch() {
           {filteredEvents.length === 0 ? (
             <div style={{ padding: 'var(--space-md)', color: 'var(--color-mute)' }}>No active natural events matching this category.</div>
           ) : (
-            filteredEvents.slice(0, 10).map((ev) => {
-              const isFire = ev.category.toLowerCase().includes('fire');
-              const isStorm = ev.category.toLowerCase().includes('storm');
-              const isVolcano = ev.category.toLowerCase().includes('volcano');
-              const badgeColor = isFire || isVolcano ? 'var(--color-sale)' : isStorm ? 'var(--color-info)' : 'var(--color-accent-teal)';
+            <>
+              {filteredEvents.slice(0, visibleCount).map((ev) => {
+                const isFire = ev.category.toLowerCase().includes('fire');
+                const isStorm = ev.category.toLowerCase().includes('storm');
+                const isVolcano = ev.category.toLowerCase().includes('volcano');
+                const badgeColor = isFire || isVolcano ? 'var(--color-sale)' : isStorm ? 'var(--color-info)' : 'var(--color-accent-teal)';
 
-              const activeDays = Math.max(1, Math.floor((Date.now() - new Date(ev.date).getTime()) / (1000 * 60 * 60 * 24)));
+                const activeDays = Math.max(1, Math.floor((Date.now() - new Date(ev.date).getTime()) / (1000 * 60 * 60 * 24)));
 
-              return (
-                <div
-                  key={ev.id}
-                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', border: '1px solid var(--color-hairline-soft)', background: 'var(--color-canvas)', flexWrap: 'wrap', gap: '8px', cursor: 'pointer' }}
-                  onClick={() => setSelectedEvent({ kind: 'eonet', ...ev })}
-                >
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                      <span className="swatch-dot" style={{ backgroundColor: badgeColor }}></span>
-                      <span className="badge-promo" style={{ color: badgeColor, borderColor: badgeColor }}>{ev.category.toUpperCase()}</span>
-                      <span style={{ fontSize: 'var(--text-caption-sm)', color: 'var(--color-mute)', fontFamily: 'var(--font-mono)' }}>Active {activeDays} days</span>
+                return (
+                  <div
+                    key={ev.id}
+                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', border: '1px solid var(--color-hairline-soft)', background: 'var(--color-canvas)', flexWrap: 'wrap', gap: '8px', cursor: 'pointer' }}
+                    onClick={() => setSelectedEvent({ kind: 'eonet', ...ev })}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <span className="swatch-dot" style={{ backgroundColor: badgeColor }}></span>
+                        <span className="badge-promo" style={{ color: badgeColor, borderColor: badgeColor }}>{ev.category.toUpperCase()}</span>
+                        <span style={{ fontSize: 'var(--text-caption-sm)', color: 'var(--color-mute)', fontFamily: 'var(--font-mono)' }}>Active {activeDays} days</span>
+                      </div>
+                      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-body-md)', color: 'var(--color-ink)' }}>{ev.title}</h3>
+                      <span style={{ fontSize: 'var(--text-caption-sm)', color: 'var(--color-mute)' }}>Location: {formatCoordinate(ev.lat, ev.lon)}</span>
                     </div>
-                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-body-md)', color: 'var(--color-ink)' }}>{ev.title}</h3>
-                    <span style={{ fontSize: 'var(--text-caption-sm)', color: 'var(--color-mute)' }}>Location: {formatCoordinate(ev.lat, ev.lon)}</span>
-                  </div>
 
-                  <button type="button" className="btn-secondary" style={{ height: '32px', padding: '0 12px', fontSize: 'var(--text-caption-sm)' }}>
-                    Safety Guidance →
+                    <button type="button" className="btn-secondary" style={{ height: '32px', padding: '0 12px', fontSize: 'var(--text-caption-sm)' }}>
+                      Safety Guidance →
+                    </button>
+                  </div>
+                );
+              })}
+
+              {visibleCount < filteredEvents.length && (
+                <div style={{ textAlign: 'center', marginTop: 'var(--space-md)' }}>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => setVisibleCount((prev) => Math.min(prev + 10, filteredEvents.length))}
+                    style={{ padding: '0 24px', height: '40px', fontSize: 'var(--text-caption-md)' }}
+                  >
+                    Load More Events ({Math.min(visibleCount, filteredEvents.length)} of {filteredEvents.length}) ↓
                   </button>
+                  <div ref={sentinelRef} style={{ height: '4px', marginTop: '4px' }}></div>
                 </div>
-              );
-            })
+              )}
+            </>
           )}
         </div>
       </section>

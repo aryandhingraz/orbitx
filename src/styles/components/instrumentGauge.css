@@ -4,7 +4,7 @@
   background-color: var(--color-soft-cloud);
   border: 1px solid var(--color-hairline);
   border-radius: var(--radius-none); /* Flat card radius per Nike spec */
-  padding: var(--space-md) var(--space-lg);
+  padding: var(--space-sm) var(--space-md);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -14,7 +14,7 @@
   box-shadow: none; /* Zero drop shadow */
   position: relative;
   transition: background-color 150ms ease, border-color 150ms ease;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .instrument-gauge:hover {
@@ -24,7 +24,7 @@
 
 /* 300ms Real-Time Value Update Flash Highlight (§4) */
 .instrument-gauge--flash {
-  background-color: rgba(17, 81, 255, 0.18) !important;
+  background-color: rgba(59, 130, 246, 0.22) !important;
   border-color: var(--color-info) !important;
   transition: background-color 0ms ease !important;
 }
@@ -36,23 +36,28 @@
   color: var(--color-mute);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  word-break: break-word;
 }
 
 .instrument-gauge__value-wrap {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: var(--space-xs);
   width: 100%;
+  min-width: 0;
 }
 
 .instrument-gauge__value {
   font-family: var(--font-mono);
-  font-size: clamp(1.1rem, 0.9rem + 0.8vw, 1.4rem);
+  font-size: clamp(0.95rem, 0.82rem + 0.5vw, 1.35rem);
   font-weight: 600;
   color: var(--color-ink);
   font-variant-numeric: tabular-nums;
-  line-height: 1.2;
+  line-height: 1.25;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .instrument-gauge__unit {

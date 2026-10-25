@@ -2,7 +2,7 @@
 
 .satellites-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: var(--space-xl);
   width: 100%;
   min-width: 0;
@@ -18,6 +18,14 @@
   gap: var(--space-md);
   box-shadow: none;
   min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+@media (max-width: 639px) {
+  .satellite-card {
+    padding: var(--space-md);
+  }
 }
 
 .satellite-card__header {
@@ -47,4 +55,18 @@
   padding: 2px 8px;
   border-radius: var(--radius-lg);
   white-space: nowrap;
+}
+
+/* Responsive fixes for satellites */
+@media (max-width: 639px) {
+  .satellites-grid {
+    grid-template-columns: 1fr;
+  }
+  .satellite-card {
+    padding: var(--space-md);
+  }
+  .satellite-card__header {
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
 }

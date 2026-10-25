@@ -2,7 +2,7 @@ import '../styles/components/liveTicker.css';
 
 export function LiveTicker({ issSpeed, issAlt, temp, aqi, quakeCount, location }) {
   const tickerItems = [
-    `STATION: ${location || 'GREENWICH OBSERVATORY'}`,
+    `STATION: ${location || 'NEW DELHI OBSERVATORY'}`,
     `ISS ORBIT: ALT ${issAlt || 418}km • VEL ${issSpeed || '27,580'}km/h`,
     `LOCAL TEMP: ${temp || '18°C'}`,
     `AIR QUALITY: ${aqi || 25} AQI (GOOD)`,

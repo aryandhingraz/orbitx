@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getMoonPhase } from '../utils/moonPhase.js';
+import { fetchWithRetry } from '../utils/fetchWithRetry.js';
 
 export function useSunAndMoon(rawLat, rawLon) {
   const lat = useMemo(() => (rawLat != null ? Math.round(rawLat * 100) / 100 : null), [rawLat]);
@@ -20,11 +21,10 @@ export function useSunAndMoon(rawLat, rawLon) {
     async function poll() {
       controller = new AbortController();
       try {
-        const queryLat = lat ?? 51.4769;
-        const queryLon = lon ?? -0.0005;
+        const queryLat = lat ?? 28.6139;
+        const queryLon = lon ?? 77.209;
         const url = `https://api.sunrise-sunset.org/json?lat=${queryLat}&lng=${queryLon}&formatted=0`;
-        const res = await fetch(url, { signal: controller.signal });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const res = await fetchWithRetry(url, { signal: controller.signal }, 2, 500, 'Solar / Lunar Ephemeris API');
         const json = await res.json();
 
         const moon = getMoonPhase(new Date());

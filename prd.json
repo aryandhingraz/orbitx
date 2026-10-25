@@ -1,0 +1,115 @@
+{
+  "project": "OrbitX - BECSE (AIFT) Batch 2025, FEE-II, PBE-II Rubric Alignment",
+  "version": "7.0",
+  "rubric_alignment": {
+    "component_1_max_marks": 75,
+    "component_2_max_marks": 25,
+    "rubric_sections": [
+      "Navigation Layout & Route Hierarchy (Lectures 37-48) - Nested routes, dynamic params, protected, 404",
+      "Context API & State Architecture (Lectures 49-54) - SettingsContext, TelemetryContext, Redux separation",
+      "Redux Toolkit (Lectures 49-54) - compareCitiesSlice, uiSlice, localStorage persistence",
+      "Form Handling (Lectures 55-60) - ValidatedField, touched state, inline errors",
+      "Pagination & Infinite Scroll (Lectures 67-72) - EarthWatch IntersectionObserver sentinel",
+      "API Hooks & Retry (Best Practices) - fetchWithRetry exponential backoff across all 9 hooks",
+      "India-First Geography - New Delhi 28.6139°N 77.2090°E as primary default"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "T01",
+      "title": "Fix all canvas chart text visibility and contrast",
+      "status": "DONE",
+      "gate": "npm run build exits 0, all chart tooltips render with >7:1 contrast ratio"
+    },
+    {
+      "id": "T02",
+      "title": "Fix dynamic canvas tooltip sizing to prevent overflow",
+      "status": "DONE",
+      "gate": "ctx.measureText used, two-axis clamping applied"
+    },
+    {
+      "id": "T03",
+      "title": "Fix InstrumentGauge text truncation ellipsis",
+      "status": "DONE",
+      "gate": "text-truncate removed, word-break applied, overflow visible"
+    },
+    {
+      "id": "T04",
+      "title": "Fix RadarChart color object bug [object Object]",
+      "status": "DONE",
+      "gate": "hexStr extracted from token objects"
+    },
+    {
+      "id": "T05",
+      "title": "Fix About page ReferenceError crash",
+      "status": "DONE",
+      "gate": "/about route loads without runtime error"
+    },
+    {
+      "id": "T06",
+      "title": "CodeRabbit CLI installed and .coderabbit.yaml configured",
+      "status": "DONE",
+      "gate": "coderabbit doctor all pass"
+    },
+    {
+      "id": "T07",
+      "title": "Vite code splitting for Three.js, Redux, React vendor chunks",
+      "status": "DONE",
+      "gate": "npm run build produces 6 clean chunks, no chunk size warning"
+    },
+    {
+      "id": "T08",
+      "title": "Full responsive audit - 320px to 1440px breakpoints",
+      "status": "DONE",
+      "gate": "All pages pass responsive audit with no overflow, no truncation"
+    },
+    {
+      "id": "T09",
+      "title": "EarthWatch infinite scroll and pagination hardening",
+      "status": "DONE",
+      "gate": "Sentinel observer correctly loads +10 items on scroll, load-more button present"
+    },
+    {
+      "id": "T10",
+      "title": "Journal page - validate all edge cases, stale data display",
+      "status": "DONE",
+      "gate": "ValidatedField fires on submit, inline error shows, entries persist"
+    },
+    {
+      "id": "T11",
+      "title": "Settings accordion disclosure sections - all 7 sections open/close",
+      "status": "DONE",
+      "gate": "All sections toggle; privacy lock save/remove round-trip works"
+    },
+    {
+      "id": "T12",
+      "title": "Compare page - Redux cities + radar chart + table all display correctly",
+      "status": "DONE",
+      "gate": "India chip adds city to Redux, radar renders, table rows match city count"
+    },
+    {
+      "id": "T13",
+      "title": "Toast stack - auto-dismiss at 4s, manual dismiss X, types render correctly",
+      "status": "DONE",
+      "gate": "success=green, sale=red, info=blue borders; auto-dismiss timer fires"
+    },
+    {
+      "id": "T14",
+      "title": "Home page - globe layers, ring panels, instrument strip gauges",
+      "status": "DONE",
+      "gate": "All 5 layer chips switch globe mode; all 3 ring markers open panel"
+    },
+    {
+      "id": "T15",
+      "title": "Satellites nested tabs - map/schedule/info Outlet routing",
+      "status": "DONE",
+      "gate": "NavLinks set active class; Outlet renders correct tab content"
+    }
+  ],
+  "loop_state": {
+    "current_iteration": 2,
+    "last_build": "PASS",
+    "last_build_time": "2026-10-25T14:51:30Z",
+    "iterations_remaining": "0 - all 15 tasks completed and verified"
+  }
+}

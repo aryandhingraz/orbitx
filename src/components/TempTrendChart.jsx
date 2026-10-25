@@ -125,7 +125,7 @@ export function TempTrendChart({ dailyData = [], unit = '°C' }) {
       const x = getX(activeIndex);
       const yMin = getY(target.minTemp);
 
-      ctx.strokeStyle = 'rgba(17, 17, 17, 0.4)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
       ctx.lineWidth = 2;
       ctx.setLineDash([4, 4]);
       ctx.beginPath();
@@ -134,37 +134,55 @@ export function TempTrendChart({ dailyData = [], unit = '°C' }) {
       ctx.stroke();
       ctx.setLineDash([]);
 
-      ctx.fillStyle = COLOR_TOKENS.info.hexStr;
+      ctx.fillStyle = '#60A5FA';
       ctx.beginPath();
       ctx.arc(x, yMin, 8, 0, Math.PI * 2);
       ctx.fill();
 
-      const boxW = 260;
-      const boxH = 100;
-      let boxX = x + 20;
-      if (boxX + boxW > width - 20) boxX = x - boxW - 20;
-      const boxY = padding + 10;
+      const dateStr = new Date(target.time).toLocaleDateString([], { month: 'short', day: 'numeric', weekday: 'short' });
+      const maxStr = `Max Temp: ${target.maxTemp}${unit}`;
+      const minStr = `Min Temp: ${target.minTemp}${unit}`;
 
-      ctx.fillStyle = 'rgba(17, 17, 17, 0.95)';
-      ctx.strokeStyle = COLOR_TOKENS.sale.hexStr;
+      ctx.font = '700 20px Space Grotesk, sans-serif';
+      const wDate = ctx.measureText(dateStr).width;
+      ctx.font = '600 20px IBM Plex Mono, monospace';
+      const wMax = ctx.measureText(maxStr).width;
+      const wMin = ctx.measureText(minStr).width;
+
+      const boxW = Math.max(wDate, wMax, wMin, 240) + 40;
+      const boxH = 104;
+
+      let boxX = x + 20;
+      if (boxX + boxW > width - 16) {
+        boxX = x - boxW - 20;
+      }
+      if (boxX < 16) boxX = 16;
+
+      let boxY = padding + 10;
+      if (boxY + boxH > height - 16) {
+        boxY = height - boxH - 16;
+      }
+
+      ctx.fillStyle = 'rgba(10, 13, 24, 0.96)';
+      ctx.strokeStyle = '#D30005';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.roundRect(boxX, boxY, boxW, boxH, 8);
       ctx.fill();
       ctx.stroke();
 
-      const dateStr = new Date(target.time).toLocaleDateString([], { month: 'short', day: 'numeric', weekday: 'short' });
-      ctx.fillStyle = COLOR_TOKENS.sale.hexStr;
-      ctx.font = '700 20px Space Grotesk';
+      ctx.fillStyle = '#F8FAFC';
+      ctx.font = '700 20px Space Grotesk, sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText(dateStr, boxX + 16, boxY + 30);
+      ctx.fillText(dateStr, boxX + 18, boxY + 30);
 
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '20px IBM Plex Mono';
-      ctx.fillText(`Max: ${target.maxTemp}${unit}`, boxX + 16, boxY + 60);
+      ctx.fillStyle = '#FCA5A5';
+      ctx.font = '600 20px IBM Plex Mono, monospace';
+      ctx.fillText(maxStr, boxX + 18, boxY + 60);
 
-      ctx.fillStyle = COLOR_TOKENS.info.hexStr;
-      ctx.fillText(`Min: ${target.minTemp}${unit}`, boxX + 16, boxY + 86);
+      ctx.fillStyle = '#93C5FD';
+      ctx.font = '600 20px IBM Plex Mono, monospace';
+      ctx.fillText(minStr, boxX + 18, boxY + 88);
     }
   }, [dailyData, unit, activeIndex]);
 
@@ -196,7 +214,8 @@ export function TempTrendChart({ dailyData = [], unit = '°C' }) {
           <span className="chart-card__subtitle">👆 Drag cursor / touch across graph to track data points</span>
         </div>
         {activeIndex !== null && dailyData[activeIndex] && (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--color-accent-teal)' }}>
+          <span className="chart-tracking-pill">
+            <span className="chart-tracking-dot"></span>
             TRACKING: {dailyData[activeIndex].maxTemp}{unit} / {dailyData[activeIndex].minTemp}{unit}
           </span>
         )}
@@ -206,13 +225,11 @@ export function TempTrendChart({ dailyData = [], unit = '°C' }) {
           ref={canvasRef}
           className="chart-canvas"
           style={{ cursor: 'crosshair' }}
-          onMouseDown={(e) => { setIsDragging(true); handlePointerMove(e); }}
-          onMouseMove={(e) => { if (isDragging || e.buttons === 1) handlePointerMove(e); }}
-          onMouseUp={() => setIsDragging(false)}
-          onMouseLeave={() => { setIsDragging(false); setActiveIndex(null); }}
-          onTouchStart={(e) => { setIsDragging(true); handlePointerMove(e); }}
-          onTouchMove={(e) => { handlePointerMove(e); }}
-          onTouchEnd={() => { setIsDragging(false); setActiveIndex(null); }}
+          onMouseMove={handlePointerMove}
+          onMouseLeave={() => setActiveIndex(null)}
+          onTouchStart={(e) => handlePointerMove(e)}
+          onTouchMove={(e) => handlePointerMove(e)}
+          onTouchEnd={() => setActiveIndex(null)}
         />
       </div>
     </div>

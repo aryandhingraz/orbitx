@@ -104,38 +104,54 @@ export function AqiTrendChart({ hourlyAqi = [] }) {
       ctx.arc(x, y, 5, 0, Math.PI * 2);
       ctx.fill();
 
-      const boxW = 240;
-      const boxH = 80;
-      let boxX = x + 20;
-      if (boxX + boxW > width - 20) boxX = x - boxW - 20;
-      const boxY = padding + 10;
+      let categoryStr = 'Good';
+      let catColor = '#34D399'; // Bright emerald
+      if (aqiVal > 50 && aqiVal <= 100) {
+        categoryStr = 'Moderate';
+        catColor = '#FBBF24'; // Bright amber
+      } else if (aqiVal > 100) {
+        categoryStr = 'Unhealthy';
+        catColor = '#F87171'; // Bright red
+      }
 
-      ctx.fillStyle = 'rgba(17, 17, 17, 0.95)';
-      ctx.strokeStyle = COLOR_TOKENS.accentTeal.hexStr;
+      const timeStr = `Time: ${activeIndex.toString().padStart(2, '0')}:00`;
+      const aqiStr = `AQI: ${aqiVal} (${categoryStr})`;
+
+      ctx.font = '700 20px Space Grotesk, sans-serif';
+      const wTime = ctx.measureText(timeStr).width;
+      ctx.font = '600 20px IBM Plex Mono, monospace';
+      const wAqi = ctx.measureText(aqiStr).width;
+
+      const boxW = Math.max(wTime, wAqi, 230) + 40;
+      const boxH = 84;
+
+      let boxX = x + 20;
+      if (boxX + boxW > width - 16) {
+        boxX = x - boxW - 20;
+      }
+      if (boxX < 16) boxX = 16;
+
+      let boxY = padding + 10;
+      if (boxY + boxH > height - 16) {
+        boxY = height - boxH - 16;
+      }
+
+      ctx.fillStyle = 'rgba(10, 13, 24, 0.96)';
+      ctx.strokeStyle = '#2DD4BF';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.roundRect(boxX, boxY, boxW, boxH, 8);
       ctx.fill();
       ctx.stroke();
 
-      let categoryStr = 'Good';
-      let catColor = COLOR_TOKENS.success.hexStr;
-      if (aqiVal > 50 && aqiVal <= 100) {
-        categoryStr = 'Moderate';
-        catColor = COLOR_TOKENS.info.hexStr;
-      } else if (aqiVal > 100) {
-        categoryStr = 'Unhealthy';
-        catColor = COLOR_TOKENS.sale.hexStr;
-      }
-
-      ctx.fillStyle = COLOR_TOKENS.accentTeal.hexStr;
-      ctx.font = '700 20px Space Grotesk';
+      ctx.fillStyle = '#F8FAFC';
+      ctx.font = '700 20px Space Grotesk, sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText(`Time: ${activeIndex}:00`, boxX + 16, boxY + 30);
+      ctx.fillText(timeStr, boxX + 18, boxY + 30);
 
       ctx.fillStyle = catColor;
-      ctx.font = '20px IBM Plex Mono';
-      ctx.fillText(`AQI: ${aqiVal} (${categoryStr})`, boxX + 16, boxY + 60);
+      ctx.font = '600 20px IBM Plex Mono, monospace';
+      ctx.fillText(aqiStr, boxX + 18, boxY + 62);
     }
   }, [data, activeIndex]);
 
@@ -166,8 +182,9 @@ export function AqiTrendChart({ hourlyAqi = [] }) {
           <span className="chart-card__subtitle">👆 Drag cursor / touch across graph to track AQI</span>
         </div>
         {activeIndex !== null && (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--color-accent-teal)' }}>
-            {activeIndex}:00 → {data[activeIndex]} AQI
+          <span className="chart-tracking-pill">
+            <span className="chart-tracking-dot"></span>
+            TRACKING: {activeIndex.toString().padStart(2, '0')}:00 → {data[activeIndex]} AQI
           </span>
         )}
       </div>
@@ -176,13 +193,11 @@ export function AqiTrendChart({ hourlyAqi = [] }) {
           ref={canvasRef}
           className="chart-canvas"
           style={{ cursor: 'crosshair' }}
-          onMouseDown={(e) => { setIsDragging(true); handlePointerMove(e); }}
-          onMouseMove={(e) => { if (isDragging || e.buttons === 1) handlePointerMove(e); }}
-          onMouseUp={() => setIsDragging(false)}
-          onMouseLeave={() => { setIsDragging(false); setActiveIndex(null); }}
-          onTouchStart={(e) => { setIsDragging(true); handlePointerMove(e); }}
-          onTouchMove={(e) => { handlePointerMove(e); }}
-          onTouchEnd={() => { setIsDragging(false); setActiveIndex(null); }}
+          onMouseMove={handlePointerMove}
+          onMouseLeave={() => setActiveIndex(null)}
+          onTouchStart={(e) => handlePointerMove(e)}
+          onTouchMove={(e) => handlePointerMove(e)}
+          onTouchEnd={() => setActiveIndex(null)}
         />
       </div>
     </div>

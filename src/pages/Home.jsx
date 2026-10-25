@@ -89,7 +89,8 @@ export function Home() {
   function handleGlobeMarkerSelect(userData) {
     if (!userData) return;
     if (userData.kind === 'overview') {
-      navigate('/explore', {
+      const slug = userData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      navigate(`/explore/${slug}`, {
         state: { selectedCity: { name: userData.name, latitude: userData.lat, longitude: userData.lon } },
       });
       return;
@@ -147,11 +148,11 @@ export function Home() {
               <span className="swatch-dot"></span>
               <span className="badge-promo">ORBITX OBSERVATORY STATION 01</span>
             </div>
-            <h1 className="mono-num" style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-hero)', fontWeight: 700, lineHeight: 0.9, textTransform: 'uppercase', color: 'var(--color-ink)', margin: 'var(--space-xs) 0' }}>
+            <h1 className="mono-num" style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem, 6vw, 4.25rem)', fontWeight: 700, lineHeight: 0.9, textTransform: 'uppercase', color: 'var(--color-ink)', margin: 'var(--space-xs) 0', overflowWrap: 'break-word', wordBreak: 'break-word' }}>
               {utcClock}
             </h1>
             <p className="page-subtitle" style={{ marginTop: 'var(--space-xs)' }}>
-              Telemetry Location: <strong>{geo.data?.cityLabel || 'GREENWICH OBSERVATORY'}</strong> ({formatCoordinate(lat, lon)})
+              Telemetry Location: <strong>{geo.data?.cityLabel || 'NEW DELHI OBSERVATORY'}</strong> ({formatCoordinate(lat, lon)})
             </p>
           </div>
 
@@ -378,7 +379,8 @@ export function Home() {
               className="btn-primary"
               style={{ textAlign: 'center' }}
               onClick={() => {
-                navigate('/explore', {
+                const slug = clickedCoord.region.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                navigate(`/explore/${slug}`, {
                   state: {
                     selectedCity: {
                       name: `${clickedCoord.region} (${clickedCoord.lat.toFixed(1)}°, ${clickedCoord.lon.toFixed(1)}°)`,

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { longitudeToAngle } from '../utils/angleMath.js';
+import { fetchWithRetry } from '../utils/fetchWithRetry.js';
 
 export function useISS() {
   const [state, setState] = useState({
@@ -18,8 +19,7 @@ export function useISS() {
       controller = new AbortController();
       try {
         const url = 'https://api.wheretheiss.at/v1/satellites/25544';
-        const res = await fetch(url, { signal: controller.signal });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const res = await fetchWithRetry(url, { signal: controller.signal }, 2, 500, 'ISS Telemetry API');
         const json = await res.json();
 
         const transformed = {

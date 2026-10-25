@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { fetchWithRetry } from '../utils/fetchWithRetry.js';
 
 export function useGeocodingSearch(query) {
   const [results, setResults] = useState([]);
@@ -18,8 +19,7 @@ export function useGeocodingSearch(query) {
       setError(null);
       try {
         const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const res = await fetchWithRetry(url, {}, 2, 500, 'Geocoding Search API');
         const json = await res.json();
 
         if (!cancelled) {

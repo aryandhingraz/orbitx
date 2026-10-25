@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { fetchWithRetry } from '../utils/fetchWithRetry.js';
 
 export function useQuakes() {
   const [state, setState] = useState({
@@ -17,8 +18,7 @@ export function useQuakes() {
       controller = new AbortController();
       try {
         const url = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson';
-        const res = await fetch(url, { signal: controller.signal });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const res = await fetchWithRetry(url, { signal: controller.signal }, 2, 500, 'USGS Earthquake API');
         const json = await res.json();
 
         const features = json.features || [];

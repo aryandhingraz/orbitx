@@ -20,8 +20,8 @@
   --color-sale-glow:      rgba(211, 0, 5, 0.35);
   --color-success:        #007D48; /* Nominal / good AQI / positive currency / ISS visible */
   --color-success-bright: #1EAA52;
-  --color-info:           #1151FF; /* Informational badges / moon phase name / timezone */
-  --color-accent-teal:    #0A7281; /* Reserved signature accent (ISS orbit track / globe line) */
+  --color-info:           #3B82F6; /* Informational badges / moon phase name / timezone */
+  --color-accent-teal:    #2DD4BF; /* Reserved signature accent (ISS orbit track / globe line) */
 
   /* Legacy color variables mapped to tokens for backwards safety */
   --void:                 var(--color-canvas);
@@ -105,6 +105,8 @@
   --color-ash:            #4B4B4D;
   --color-mute:           #707072;
   --color-stone:          #9E9EA0;
+  --color-info:           #1151FF;
+  --color-accent-teal:    #0A7281;
 
   --void:                 var(--color-canvas);
   --panel:                var(--color-soft-cloud);

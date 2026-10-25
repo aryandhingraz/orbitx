@@ -6,13 +6,13 @@
 export const COLOR_TOKENS = {
   accentTeal: {
     css: 'var(--color-accent-teal)',
-    hexStr: '#0A7281',
-    threeHex: 0x0a7281,
+    hexStr: '#2DD4BF',
+    threeHex: 0x2dd4bf,
   },
   info: {
     css: 'var(--color-info)',
-    hexStr: '#1151FF',
-    threeHex: 0x1151ff,
+    hexStr: '#60A5FA',
+    threeHex: 0x60a5fa,
   },
   success: {
     css: 'var(--color-success-bright)',
@@ -26,8 +26,8 @@ export const COLOR_TOKENS = {
   },
   ink: {
     css: 'var(--color-ink)',
-    hexStr: '#111111',
-    threeHex: 0x111111,
+    hexStr: '#FFFFFF',
+    threeHex: 0xffffff,
   },
   mute: {
     css: 'var(--color-mute)',
@@ -36,8 +36,8 @@ export const COLOR_TOKENS = {
   },
   softCloud: {
     css: 'var(--color-soft-cloud)',
-    hexStr: '#F5F5F5',
-    threeHex: 0xf5f5f5,
+    hexStr: '#141A2B',
+    threeHex: 0x141a2b,
   },
   hairline: {
     css: 'var(--color-hairline)',

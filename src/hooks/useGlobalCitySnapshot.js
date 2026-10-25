@@ -2,13 +2,19 @@ import { useState, useEffect } from 'react';
 import { useSettings } from '../context/SettingsContext.jsx';
 import { celsiusToFahrenheit, kmhToMph } from '../utils/unitConversion.js';
 import { COLOR_TOKENS } from '../utils/colorTokens.js';
+import { fetchWithRetry } from '../utils/fetchWithRetry.js';
 
 const MAJOR_CITIES = [
+  { name: 'New Delhi', lat: 28.6139, lon: 77.209 },
+  { name: 'Mumbai', lat: 19.0760, lon: 72.8777 },
+  { name: 'Bengaluru', lat: 12.9716, lon: 77.5946 },
+  { name: 'Kolkata', lat: 22.5726, lon: 88.3639 },
+  { name: 'Chennai', lat: 13.0827, lon: 80.2707 },
+  { name: 'Hyderabad', lat: 17.3850, lon: 78.4867 },
   { name: 'London', lat: 51.5074, lon: -0.1278 },
   { name: 'New York', lat: 40.7128, lon: -74.006 },
   { name: 'Tokyo', lat: 35.6762, lon: 139.6503 },
   { name: 'Sydney', lat: -33.8688, lon: 151.2093 },
-  { name: 'New Delhi', lat: 28.6139, lon: 77.209 },
   { name: 'Cairo', lat: 30.0444, lon: 31.2357 },
   { name: 'Rio de Janeiro', lat: -22.9068, lon: -43.1729 },
   { name: 'Paris', lat: 48.8566, lon: 2.3522 },
@@ -37,8 +43,8 @@ export function useGlobalCitySnapshot() {
         const aqiUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${city.lat}&longitude=${city.lon}&current=us_aqi&forecast_days=1`;
 
         const [wRes, aRes] = await Promise.allSettled([
-          fetch(weatherUrl, { signal: controller.signal }),
-          fetch(aqiUrl, { signal: controller.signal }),
+          fetchWithRetry(weatherUrl, { signal: controller.signal }, 2, 500, `Global Weather (${city.name})`),
+          fetchWithRetry(aqiUrl, { signal: controller.signal }, 2, 500, `Global AQI (${city.name})`),
         ]);
 
         let tempC = 18;

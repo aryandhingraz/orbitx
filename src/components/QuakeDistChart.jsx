@@ -42,13 +42,13 @@ export function QuakeDistChart({ quakes = [] }) {
       ctx.fillStyle = b.color;
       ctx.fillRect(x, y, barW, barH);
 
-      ctx.fillStyle = COLOR_TOKENS.ink.hexStr;
-      ctx.font = '22px IBM Plex Mono';
+      ctx.fillStyle = '#F8FAFC';
+      ctx.font = '600 22px IBM Plex Mono, monospace';
       ctx.textAlign = 'center';
       ctx.fillText(`${b.count}`, x + barW / 2, y - 10);
 
-      ctx.fillStyle = COLOR_TOKENS.mute.hexStr;
-      ctx.font = '20px Space Grotesk';
+      ctx.fillStyle = '#CBD5E1';
+      ctx.font = '600 20px Space Grotesk, sans-serif';
       ctx.fillText(b.label, x + barW / 2, height - 15);
     });
   }, [quakes]);

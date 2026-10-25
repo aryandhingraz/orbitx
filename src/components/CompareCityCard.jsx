@@ -15,8 +15,8 @@ export function CompareCityCard({ city, weatherData, aqiData, onRemove }) {
     <div className="compare-card data-widget-card" style={{ gap: 'var(--space-md)' }}>
       <div className="compare-card__header">
         <div style={{ minWidth: 0 }}>
-          <h2 className="compare-card__name text-truncate" title={city.name}>{city.name}</h2>
-          <span className="compare-card__country text-truncate" title={`${city.country} • ${formatCoordinate(city.latitude, city.longitude)}`}>
+          <h2 className="compare-card__name" title={city.name}>{city.name}</h2>
+          <span className="compare-card__country" title={`${city.country} • ${formatCoordinate(city.latitude, city.longitude)}`}>
             {city.country} • {formatCoordinate(city.latitude, city.longitude)}
           </span>
         </div>
@@ -32,7 +32,7 @@ export function CompareCityCard({ city, weatherData, aqiData, onRemove }) {
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-sm)', minWidth: 0 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 120px), 1fr))', gap: 'var(--space-sm)', minWidth: 0 }}>
         {!weather.temperature && weather.temperature !== 0 ? (
           <SkeletonPulse width="100%" height="84px" />
         ) : (
@@ -56,7 +56,7 @@ export function CompareCityCard({ city, weatherData, aqiData, onRemove }) {
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-sm)', minWidth: 0 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 120px), 1fr))', gap: 'var(--space-sm)', minWidth: 0 }}>
         <InstrumentGauge
           label="Wind Speed"
           value={formatWindSpeed(weather.windSpeed, units)}
