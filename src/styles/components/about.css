@@ -1,4 +1,4 @@
-/* About Page Component Styles — Nike Specs (§2.4, §4.7) */
+/* About Page Component Styles — Professional Observatory Theme */
 
 .about-article {
   background-color: var(--color-soft-cloud);
@@ -8,7 +8,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
-  max-width: 1080px;
+  max-width: 1120px;
   width: 100%;
   box-shadow: none;
   font-family: var(--font-body);
@@ -52,11 +52,12 @@
   border-left: 4px solid var(--color-accent-teal);
   border-radius: var(--radius-none);
   padding: var(--space-md) var(--space-lg);
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: var(--text-caption-md);
   color: var(--color-ink);
   overflow-wrap: break-word;
   word-break: break-word;
+  line-height: 1.7;
 }
 
 @media (max-width: 639px) {
@@ -66,23 +67,152 @@
   }
 }
 
-.about-rubric-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-  gap: var(--space-md);
-}
-
-.about-api-grid {
+/* Architecture Pillars Grid */
+.about-pillars-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: var(--space-md);
-  margin-top: var(--space-xs);
+  margin-top: var(--space-sm);
+}
+
+.about-pillar-card {
+  background-color: var(--color-canvas);
+  border: 1px solid var(--color-hairline);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.about-pillar-card__title {
+  font-family: var(--font-display);
+  font-size: var(--text-caption-md);
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.about-pillar-card__text {
+  font-size: var(--text-caption-sm);
+  color: var(--color-mute);
+  line-height: 1.5;
+}
+
+/* Syllabus Curriculum Cards */
+.about-syllabus-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: var(--space-md);
+}
+
+.about-syllabus-card {
+  background-color: var(--color-canvas);
+  border: 1px solid var(--color-hairline);
+  border-top: 3px solid var(--color-accent-teal);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.about-lecture-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-accent-teal);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.about-syllabus-card__title {
+  font-family: var(--font-display);
+  font-size: var(--text-body-md);
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.about-syllabus-card__list {
+  font-size: var(--text-caption-sm);
+  color: var(--color-mute);
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1.5;
+}
+
+/* Observatory Station Directory */
+.about-stations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: var(--space-md);
+  margin-top: var(--space-sm);
+}
+
+.about-station-card {
+  background-color: var(--color-canvas);
+  border: 1px solid var(--color-hairline);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color var(--transition-fast);
+}
+
+.about-station-card:hover {
+  border-color: var(--color-accent-teal);
+}
+
+.about-station-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.about-station-card__title {
+  font-family: var(--font-display);
+  font-size: var(--text-body-md);
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.about-station-card__route {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-accent-teal);
+  background-color: var(--color-soft-cloud);
+  padding: 2px 6px;
+  border: 1px solid var(--color-hairline-soft);
+}
+
+.about-station-card__desc {
+  font-size: var(--text-caption-sm);
+  color: var(--color-mute);
+  line-height: 1.5;
+}
+
+.about-station-card__tech {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-ink);
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--color-hairline-soft);
+}
+
+/* API Grid */
+.about-api-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+  gap: var(--space-md);
+  margin-top: var(--space-sm);
 }
 
 .about-api-card {
   background-color: var(--color-canvas);
   border: 1px solid var(--color-hairline);
-  border-radius: var(--radius-none);
   padding: var(--space-md);
   font-family: var(--font-body);
   font-size: var(--text-caption-md);
@@ -91,18 +221,11 @@
   word-break: break-word;
 }
 
-.about-stations-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-  gap: var(--space-md);
-  margin-top: var(--space-md);
-}
-
-/* 4-Column Footer Pattern (§2.4) */
+/* 4-Column Footer Pattern */
 .about-footer {
   border-top: 1px solid var(--color-hairline);
   padding-top: var(--space-xl);
-  margin-top: var(--space-xl);
+  margin-top: var(--space-lg);
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
