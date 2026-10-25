@@ -4,6 +4,17 @@ import { fetchWithRetry } from '../utils/fetchWithRetry.js';
 
 const POLL_MS = 5 * 60 * 1000; // 5 minutes
 
+const DEFAULT_K_HISTORY = [
+  { time: '00:00', timeFull: '00:00 UTC', kp: 2.0 },
+  { time: '03:00', timeFull: '03:00 UTC', kp: 2.3 },
+  { time: '06:00', timeFull: '06:00 UTC', kp: 1.7 },
+  { time: '09:00', timeFull: '09:00 UTC', kp: 2.0 },
+  { time: '12:00', timeFull: '12:00 UTC', kp: 1.7 },
+  { time: '15:00', timeFull: '15:00 UTC', kp: 2.7 },
+  { time: '18:00', timeFull: '18:00 UTC', kp: 3.0 },
+  { time: '21:00', timeFull: '21:00 UTC', kp: 2.0 },
+];
+
 export function useSpaceWeather() {
   const { refreshRate } = useSettings();
   const [state, setState] = useState({
@@ -21,23 +32,33 @@ export function useSpaceWeather() {
     async function poll() {
       controller = new AbortController();
       try {
-        const kIndexUrl = 'https://services.swpc.noaa.gov/json/planetary_k_index_1m.json';
+        const kIndexUrl = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json';
         const windUrl = 'https://services.swpc.noaa.gov/json/rtsw/rtsw_wind_1m.json';
 
         const [kRes, wRes] = await Promise.allSettled([
-          fetchWithRetry(kIndexUrl, { signal: controller.signal }, 2, 500, 'NOAA SWPC K-Index'),
+          fetchWithRetry(kIndexUrl, { signal: controller.signal }, 2, 500, 'NOAA SWPC 24h K-Index'),
           fetchWithRetry(windUrl, { signal: controller.signal }, 2, 500, 'NOAA Solar Wind API'),
         ]);
 
         let kIndexVal = 2; // Default nominal
-        let kHistory = [1, 2, 2, 3, 2, 1, 2, 3, 4, 3, 2, 2];
+        let kHistory = DEFAULT_K_HISTORY;
 
         if (kRes.status === 'fulfilled' && kRes.value.ok) {
           const json = await kRes.value.json();
           if (Array.isArray(json) && json.length > 0) {
-            const latest = json[json.length - 1];
-            kIndexVal = latest.kp_index ?? Math.round(latest.kp ?? latest.k_index ?? 2);
-            kHistory = json.slice(-12).map((item) => item.kp_index ?? Math.round(item.kp ?? item.k_index ?? 2));
+            const last8 = json.slice(-8);
+            kHistory = last8.map((item) => {
+              const kpNum = typeof item.Kp === 'number' ? Math.round(item.Kp * 10) / 10 : parseFloat(item.Kp) || 2;
+              const timeStr = item.time_tag ? item.time_tag.substring(11, 16) : '00:00';
+              const fullStr = item.time_tag ? item.time_tag.replace('T', ' ') + ' UTC' : `${timeStr} UTC`;
+              return {
+                time: timeStr,
+                timeFull: fullStr,
+                kp: kpNum,
+              };
+            });
+            const latest = kHistory[kHistory.length - 1];
+            kIndexVal = Math.round(latest.kp);
           }
         }
 
@@ -98,7 +119,7 @@ export function useSpaceWeather() {
             data: {
               kpIndex: 2,
               kpStatus: 'nominal',
-              kHistory: [2, 2, 3, 2, 3, 4, 3, 2, 3, 2, 3, 2],
+              kHistory: DEFAULT_K_HISTORY,
               solarWindSpeed: 420,
               solarWindDensity: '5.2',
               auroraLikelihood: 'Low',
